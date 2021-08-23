@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "mathjs": "^9.4.4"
+  },
+  "devDependencies": {
+    "webpack": "^5.51.1",
+    "webpack-cli": "^4.8.0"
+  },
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  }
+}
