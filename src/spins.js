@@ -30,4 +30,11 @@ const yDownProj = kron(yDownBra, yDownKet);
    Leaving the oven, the electron's initial spin state is effectively random due to ignorance of its history.
    This is best represented by a mixed-state density matrix
 */
-let densityOperator =  add(multiply(zUpProj, 1/2), multiply(zDownProj, 1/2))
+let densityOperator = add(multiply(zUpProj, 1 / 2), multiply(zDownProj, 1 / 2));
+
+// Born Rule for a quantum history
+function probability(history) {
+	return multiply(transpose(history), densityOperator, history);
+}
+
+console.log(probability(yDownKet));
