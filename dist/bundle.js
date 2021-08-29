@@ -140,14 +140,25 @@ eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPAC
 
 /***/ }),
 
-/***/ "./src/spins.js":
-/*!**********************!*\
-  !*** ./src/spins.js ***!
-  \**********************/
+/***/ "./src/gui.js":
+/*!********************!*\
+  !*** ./src/gui.js ***!
+  \********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var mathjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mathjs */ \"./node_modules/mathjs/lib/esm/entry/pureFunctionsAny.generated.js\");\n\n\n// Eigenstates\nconst zUpBra = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1, 0]]);\nconst zDownBra = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[0, 1]]);\nconst zUpKet = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.ctranspose)(zUpBra);\nconst zDownKet = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.ctranspose)(zDownBra);\n\nconst xUpBra = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2), 1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2)]]);\nconst xDownBra = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2), -1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2)]]);\nconst xUpKet = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.ctranspose)(xUpBra);\nconst xDownKet = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.ctranspose)(xDownBra);\n\nconst yUpBra = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2), (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.complex)(0, 1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2))]]);\nconst yDownBra = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2), (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.complex)(0, -1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2))]]);\nconst yUpKet = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.ctranspose)(yUpBra);\nconst yDownKet = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.ctranspose)(yDownBra);\n\n// Projectors\nconst zUpProj = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.kron)(zUpKet, zUpBra);\nconst zDownProj = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.kron)(zDownKet, zDownBra);\n\nconst xUpProj = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.kron)(xUpKet, xUpBra);\nconst xDownProj = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.kron)(xDownKet, xDownBra);\n\nconst yUpProj = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.kron)(yUpKet, yUpBra);\nconst yDownProj = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.kron)(yDownKet, yDownBra);\n\n/*\n   Leaving the oven, the electron's initial spin state is effectively random due to ignorance of its history.\n   This is best represented by a mixed-state density matrix\n*/\nlet densityOperator = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.add)((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.multiply)(zUpProj, 1 / 2), (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.multiply)(zDownProj, 1 / 2));\n\n// Born Rule for a quantum history (passed as a branch wavefunction)\nfunction probability(history) {\n\treturn (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.re)((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.trace)((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.multiply)((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.ctranspose)(history), densityOperator, history)));\n}\n\n// Example: measure Sz, then Sx\n// density operator is initialized with t1 event, now adding t2\n\n\nconsole.log(probability((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.multiply)(yDownProj, zUpProj)));\n\n\n//# sourceURL=webpack:///./src/spins.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _physics_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./physics.js */ \"./src/physics.js\");\n\n\nconsole.log((0,_physics_js__WEBPACK_IMPORTED_MODULE_0__.probability)((0,_physics_js__WEBPACK_IMPORTED_MODULE_0__.projector)(_physics_js__WEBPACK_IMPORTED_MODULE_0__.spinStates.zUp)));\n\n\n//# sourceURL=webpack:///./src/gui.js?");
+
+/***/ }),
+
+/***/ "./src/physics.js":
+/*!************************!*\
+  !*** ./src/physics.js ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"spinStates\": () => (/* binding */ spinStates),\n/* harmony export */   \"projector\": () => (/* binding */ projector),\n/* harmony export */   \"probability\": () => (/* binding */ probability)\n/* harmony export */ });\n/* harmony import */ var mathjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mathjs */ \"./node_modules/mathjs/lib/esm/entry/pureFunctionsAny.generated.js\");\n\n\n// Spin eigenstates for X,Y,Z bases, in \"bra\" form\nconst spinStates = {\n\tzUp: (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1, 0]]),\n\tzDown: (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[0, 1]]),\n\n\txUp: (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2), 1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2)]]),\n\txDown: (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2), -1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2)]]),\n\n\tyUp: (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2), (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.complex)(0, 1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2))]]),\n\tyDown: (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.matrix)([[1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2), (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.complex)(0, -1 / (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.sqrt)(2))]]),\n};\n\nfunction projector(state) {\n\treturn (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.kron)((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.ctranspose)(state), state);\n}\n\n/*\n   Leaving the oven, the electron's initial spin state is effectively random due to ignorance of its history.\n   This is best represented by a mixed-state density matrix\n*/\nconst densityOperator = (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.add)((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.multiply)(projector(spinStates.zUp), 1 / 2), (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.multiply)(projector(spinStates.zDown), 1 / 2));\n\n// Born Rule for a quantum history (passed as a branch wavefunction)\nfunction probability(history) {\n\t// Function re() is present because of the nature of mathjs complex numbers, not physics\n\treturn (0,mathjs__WEBPACK_IMPORTED_MODULE_0__.re)((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.trace)((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.multiply)((0,mathjs__WEBPACK_IMPORTED_MODULE_0__.ctranspose)(history), densityOperator, history)));\n}\n\n\n\n\n//# sourceURL=webpack:///./src/physics.js?");
 
 /***/ }),
 
@@ -3479,7 +3490,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module can't be inlined because the eval devtool is used.
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/spins.js");
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/gui.js");
 /******/ 	
 /******/ })()
 ;

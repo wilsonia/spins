@@ -1,36 +1,26 @@
 import {sqrt, complex, matrix, kron, ctranspose, multiply, add, trace, re} from 'mathjs';
 
-// Eigenstates
-const zUpBra = matrix([[1, 0]]);
-const zDownBra = matrix([[0, 1]]);
-const zUpKet = ctranspose(zUpBra);
-const zDownKet = ctranspose(zDownBra);
+// Spin eigenstates for X,Y,Z bases, in "bra" form
+const spinStates = {
+	zUp: matrix([[1, 0]]),
+	zDown: matrix([[0, 1]]),
 
-const xUpBra = matrix([[1 / sqrt(2), 1 / sqrt(2)]]);
-const xDownBra = matrix([[1 / sqrt(2), -1 / sqrt(2)]]);
-const xUpKet = ctranspose(xUpBra);
-const xDownKet = ctranspose(xDownBra);
+	xUp: matrix([[1 / sqrt(2), 1 / sqrt(2)]]),
+	xDown: matrix([[1 / sqrt(2), -1 / sqrt(2)]]),
 
-const yUpBra = matrix([[1 / sqrt(2), complex(0, 1 / sqrt(2))]]);
-const yDownBra = matrix([[1 / sqrt(2), complex(0, -1 / sqrt(2))]]);
-const yUpKet = ctranspose(yUpBra);
-const yDownKet = ctranspose(yDownBra);
+	yUp: matrix([[1 / sqrt(2), complex(0, 1 / sqrt(2))]]),
+	yDown: matrix([[1 / sqrt(2), complex(0, -1 / sqrt(2))]]),
+};
 
-// Projectors
-const zUpProj = kron(zUpKet, zUpBra);
-const zDownProj = kron(zDownKet, zDownBra);
-
-const xUpProj = kron(xUpKet, xUpBra);
-const xDownProj = kron(xDownKet, xDownBra);
-
-const yUpProj = kron(yUpKet, yUpBra);
-const yDownProj = kron(yDownKet, yDownBra);
+function projector(state) {
+	return kron(ctranspose(state), state);
+}
 
 /*
    Leaving the oven, the electron's initial spin state is effectively random due to ignorance of its history.
    This is best represented by a mixed-state density matrix
 */
-let densityOperator = add(multiply(zUpProj, 1 / 2), multiply(zDownProj, 1 / 2));
+const densityOperator = add(multiply(projector(spinStates.zUp), 1 / 2), multiply(projector(spinStates.zDown), 1 / 2));
 
 // Born Rule for a quantum history (passed as a branch wavefunction)
 function probability(history) {
@@ -38,4 +28,4 @@ function probability(history) {
 	return re(trace(multiply(ctranspose(history), densityOperator, history)));
 }
 
-export {probability}
+export {spinStates, projector, probability};
