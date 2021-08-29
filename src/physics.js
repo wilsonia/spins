@@ -38,8 +38,4 @@ function probability(history) {
 	return re(trace(multiply(ctranspose(history), densityOperator, history)));
 }
 
-// Example: measure Sz, then Sx
-// density operator is initialized with t1 event, now adding t2
-
-
-console.log(probability(multiply(yDownProj, zUpProj)));
+export {probability}
