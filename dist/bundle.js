@@ -147,7 +147,7 @@ eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPAC
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _physics_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./physics.js */ \"./src/physics.js\");\n\n\nconsole.log((0,_physics_js__WEBPACK_IMPORTED_MODULE_0__.probability)((0,_physics_js__WEBPACK_IMPORTED_MODULE_0__.projector)(_physics_js__WEBPACK_IMPORTED_MODULE_0__.spinStates.zUp)));\n\n\n//# sourceURL=webpack:///./src/gui.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _physics_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./physics.js */ \"./src/physics.js\");\n\n\nconst canvas = document.getElementById('canvas');\nconst ctx = canvas.getContext('2d');\n\nctx.fillStyle = 'rgb(200, 0, 0)';\nctx.fillRect(10, 10, 50, 50);\n\nctx.fillStyle = 'rgba(0, 0, 200, 0.5)';\nctx.fillRect(30, 30, 50, 50);\n\nconsole.log((0,_physics_js__WEBPACK_IMPORTED_MODULE_0__.probability)((0,_physics_js__WEBPACK_IMPORTED_MODULE_0__.projector)(_physics_js__WEBPACK_IMPORTED_MODULE_0__.spinStates.zUp)));\n\n\n//# sourceURL=webpack:///./src/gui.js?");
 
 /***/ }),
 
