@@ -34,6 +34,7 @@ let densityOperator = add(multiply(zUpProj, 1 / 2), multiply(zDownProj, 1 / 2));
 
 // Born Rule for a quantum history (passed as a branch wavefunction)
 function probability(history) {
+	// Function re() is present because of the nature of mathjs complex numbers, not physics
 	return re(trace(multiply(ctranspose(history), densityOperator, history)));
 }
 
