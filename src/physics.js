@@ -22,10 +22,30 @@ function projector(state) {
 */
 const densityOperator = add(multiply(projector(spinStates.zUp), 1 / 2), multiply(projector(spinStates.zDown), 1 / 2));
 
-// Born Rule for a quantum history (passed as a branch wavefunction)
+// Born Rule for a quantum history (expects a class operator)
 function probability(history) {
 	// Function re() is present because of the nature of mathjs complex numbers, not physics
-	return re(trace(multiply(ctranspose(history), densityOperator, history)));
+	return re(trace(multiply(ctranspose(history), history)));
 }
 
-export {spinStates, projector, probability};
+const histories = {
+	zUp: {
+		xUp: {},
+		xDown: {},
+	},
+	zDown: {},
+};
+
+function computeProbabilities(histories, history = densityOperator) {
+	for (const [event, value] of Object.entries(histories)) {
+		if (Object.keys(value).length > 0) {
+			computeProbabilities(value, multiply(projector(spinStates[event]), history));
+		} else {
+			console.log(probability(history));
+		}
+	}
+}
+
+computeProbabilities(histories);
+
+export {computeProbabilities};

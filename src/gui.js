@@ -1,4 +1,4 @@
-import {spinStates, projector, probability} from './physics.js';
+import {computeProbabilities} from './physics.js';
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -8,5 +8,3 @@ ctx.fillRect(10, 10, 50, 50);
 
 ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
 ctx.fillRect(30, 30, 50, 50);
-
-console.log(probability(projector(spinStates.zUp)));
