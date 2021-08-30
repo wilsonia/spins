@@ -1,4 +1,5 @@
-import {sqrt, complex, matrix, kron, ctranspose, multiply, add, trace, re} from 'mathjs';
+import {sqrt, complex, matrix, kron, ctranspose, multiply, add, trace, re, identity} from 'mathjs';
+import mapValuesDeep from 'deepdash/mapValuesDeep';
 
 // Spin eigenstates for X,Y,Z bases, in "bra" form
 const spinStates = {
@@ -17,7 +18,7 @@ function projector(state) {
 }
 
 /*
-   Leaving the oven, the electron's initial spin state is effectively random due to ignorance of its history.
+   Leaving the oven, the electron's initial spin state is effectively random due to ignorance of its history
    This is best represented by a mixed-state density matrix
 */
 const densityOperator = add(multiply(projector(spinStates.zUp), 1 / 2), multiply(projector(spinStates.zDown), 1 / 2));
@@ -25,27 +26,20 @@ const densityOperator = add(multiply(projector(spinStates.zUp), 1 / 2), multiply
 // Born Rule for a quantum history (expects a class operator)
 function probability(history) {
 	// Function re() is present because of the nature of mathjs complex numbers, not physics
-	return re(trace(multiply(ctranspose(history), history)));
+	return re(trace(multiply(ctranspose(history), densityOperator, history)));
 }
 
-const histories = {
-	zUp: {
-		xUp: {},
-		xDown: {},
-	},
-	zDown: {},
-};
-
-function computeProbabilities(histories, history = densityOperator) {
-	for (const [event, value] of Object.entries(histories)) {
-		if (Object.keys(value).length > 0) {
-			computeProbabilities(value, multiply(projector(spinStates[event]), history));
-		} else {
-			console.log(probability(history));
-		}
-	}
+/*
+   Calculates the probabilities for a consistent set of histories (formatted as a tree of events).
+	 Deepdash traverses the tree, and assigns each endpoint (leaf) a class operator.
+	 The class operator is used to compute history probability, which is then assigned as the leaf's value.
+*/
+function computeProbabilities(histories) {
+	return mapValuesDeep(histories, (value, key, parent, context) => {
+		// Function identity() is present because mathjs.multiply() requires at least 2 arguments, and the path may only produce 1
+		const history = multiply(identity(2), ...context.path.map(event => projector(spinStates[event])));
+		return probability(history);
+	}, {leavesOnly: true, pathFormat: 'array'});
 }
-
-computeProbabilities(histories);
 
 export {computeProbabilities};

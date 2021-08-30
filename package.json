@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "deepdash": "^5.3.9",
     "mathjs": "^9.4.4"
   },
   "devDependencies": {
