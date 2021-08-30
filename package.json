@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "deepdash": "^5.3.9",
+    "mathjs": "^9.4.4"
+  },
+  "devDependencies": {
+    "esgraph": "^0.3.0",
+    "eslint": "^7.32.0",
+    "eslint-config-xo": "^0.38.0",
+    "esprima": "^4.0.1",
+    "webpack": "^5.51.1",
+    "webpack-cli": "^4.8.0"
+  },
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  }
+}
