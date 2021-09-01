@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "d3": "^7.0.1",
+    "d3-hierarchy": "^3.0.1",
     "deepdash": "^5.3.9",
     "mathjs": "^9.4.4"
   },
