@@ -1,5 +1,6 @@
 import {computeProbabilities} from './physics.js';
 import * as d3 from 'd3';
+import isPlainObject from 'lodash/isPlainObject';
 
 const histories = {
 	zUp: {
@@ -24,7 +25,15 @@ root.x0 = dy / 2;
 root.y0 = 0;
 root.descendants().forEach((d, i) => {
 	d.id = i;
-	console.log(d, i);
+	// Label analyzers
+	if (isPlainObject(d.data)) {
+		d.name = `S${Object.keys(d.data)[0][0]}`;
+	}
+
+	// Label probabilities at leaves
+	if (typeof d.data === 'number') {
+		d.name = d.data;
+	}
 });
 
 tree(root);
@@ -92,22 +101,21 @@ function update(source) {
 		.attr('fill-opacity', 0)
 		.attr('stroke-opacity', 0)
 		.on('click', (event, d) => {
-			d.children = d.children ? null : d._children;
 			update(d);
 		});
 
 	nodeEnter
 		.append('circle')
 		.attr('r', 2.5)
-		.attr('fill', d => (d._children ? '#555' : '#999'))
+		.attr('fill', '#555')
 		.attr('stroke-width', 10);
 
 	nodeEnter
 		.append('text')
 		.attr('dy', '0.31em')
-		.attr('x', d => (d._children ? -6 : 6))
-		.attr('text-anchor', d => (d._children ? 'end' : 'start'))
-		.text(d => d.data)
+		.attr('x', 6)
+		.attr('text-anchor', 'start')
+		.text(d => d.name)
 		.clone(true)
 		.lower()
 		.attr('stroke-linejoin', 'round')
