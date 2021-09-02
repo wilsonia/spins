@@ -9,14 +9,27 @@ const histories = {
 		'n,down,1.57,1.57': {},
 	},
 	'z,down': {
+		'x,up': {
+		},
+		'x,down':
+		{
+			'y,up':
+			{
+
+			},
+			'y,down':
+			{
+
+			},
+		},
 	},
 };
 
-const margin = {top: 10, right: 120, bottom: 10, left: 40};
+const margin = {top: 100, right: 120, bottom: 100, left: 100};
 const width = d3.width || 960;
 const root = d3.hierarchy(computeProbabilities(histories), branch => Object.values(branch));
-const dx = width / 10;
-const dy = width / 6;
+const dx = width / 12;
+const dy = width / 5;
 const tree = d3.tree().nodeSize([dx, dy]);
 const diagonal = d3
 	.linkHorizontal()
@@ -29,13 +42,15 @@ root.descendants().forEach((d, i) => {
 	d.id = i;
 	// Label analyzers
 	if (isPlainObject(d.data)) {
-		const [basis, up, theta, phi] = Object.keys(d.data)[0].split(',');
-		d.name = (basis === 'n') ? `S${basis},${theta},${phi}` : `S${basis}`;
+		const [basis, , theta, phi] = Object.keys(d.data)[0].split(',');
+		d.basis = `S${basis}`;
+		d.theta = (basis === 'n') ? `theta = ${round(theta, 2)}` : '';
+		d.phi = (basis === 'n') ? `phi = ${round(phi, 2)}` : '';
 	}
 
 	// Label probabilities at leaves
 	if (typeof d.data === 'number') {
-		d.name = round(d.data, 2);
+		d.basis = round(d.data, 2);
 	}
 });
 
@@ -96,7 +111,6 @@ function update(source) {
 	// Update the nodes…
 	const node = gNode.selectAll('g').data(nodes, d => d.id);
 
-	// Enter any new nodes at the parent's previous position.
 	const nodeEnter = node
 		.enter()
 		.append('g')
@@ -108,17 +122,46 @@ function update(source) {
 		});
 
 	nodeEnter
-		.append('circle')
-		.attr('r', 2.5)
-		.attr('fill', '#555')
-		.attr('stroke-width', 10);
+		.append('rect')
+		.attr('width', 1.25 * dx)
+		.attr('height', 0.8 * dx)
+		.attr('fill', 'white')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
 
 	nodeEnter
 		.append('text')
 		.attr('dy', '0.31em')
 		.attr('x', 6)
+		.attr('y', 0.2 * dx)
 		.attr('text-anchor', 'start')
-		.text(d => d.name)
+		.text(d => d.basis)
+		.clone(true)
+		.lower()
+		.attr('stroke-linejoin', 'round')
+		.attr('stroke-width', 3)
+		.attr('stroke', 'white');
+
+	nodeEnter
+		.append('text')
+		.attr('dy', '0.31em')
+		.attr('x', 6)
+		.attr('y', 0.4 * dx)
+		.attr('text-anchor', 'start')
+		.text(d => d.theta)
+		.clone(true)
+		.lower()
+		.attr('stroke-linejoin', 'round')
+		.attr('stroke-width', 3)
+		.attr('stroke', 'white');
+
+	nodeEnter
+		.append('text')
+		.attr('dy', '0.31em')
+		.attr('x', 6)
+		.attr('y', 0.6 * dx)
+		.attr('text-anchor', 'start')
+		.text(d => d.phi)
 		.clone(true)
 		.lower()
 		.attr('stroke-linejoin', 'round')
@@ -129,18 +172,9 @@ function update(source) {
 	node
 		.merge(nodeEnter)
 		.transition(transition)
-		.attr('transform', d => `translate(${d.y},${d.x})`)
+		.attr('transform', d => `translate(${d.y - (1.25 * dx / 2)},${d.x - (0.8 * dx / 2)})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
-
-	// Transition exiting nodes to the parent's new position.
-	node
-		.exit()
-		.transition(transition)
-		.remove()
-		.attr('transform', () => `translate(${source.y},${source.x})`)
-		.attr('fill-opacity', 0)
-		.attr('stroke-opacity', 0);
 
 	// Update the links…
 	const link = gLink.selectAll('path').data(links, d => d.target.id);
