@@ -1,5 +1,10 @@
-import {sqrt, complex, matrix, kron, ctranspose, multiply, add, trace, re, identity} from 'mathjs';
+import {sqrt, complex, matrix, kron, ctranspose, multiply, add, trace, re, identity, cos, sin, exp, pi} from 'mathjs';
 import mapValuesDeep from 'deepdash/mapValuesDeep';
+
+function spinState(theta, phi, up) {
+	return up ? matrix([[cos(theta / 2), sin(theta / 2) * exp(complex(0, phi))]])
+		: matrix([[sin(theta / 2), -cos(theta / 2) * exp(complex(0, phi))]]);
+}
 
 // Spin eigenstates for X,Y,Z bases, in "bra" form
 const spinStates = {
@@ -29,6 +34,15 @@ function probability(history) {
 	return re(trace(multiply(ctranspose(history), densityOperator, history)));
 }
 
+// Maps a history schema eventId to an event operator
+function event(eventId) {
+	if (eventId.startsWith('n')) {
+
+	}
+
+	return projector(spinStates[eventId]);
+}
+
 /*
    Calculates the probabilities for a consistent set of histories (formatted as a tree of events).
 	 Deepdash traverses the tree, and assigns each endpoint (leaf) a class operator.
@@ -37,7 +51,7 @@ function probability(history) {
 function computeProbabilities(histories) {
 	return mapValuesDeep(histories, (value, key, parent, context) => {
 		// Function identity() is present because mathjs.multiply() requires at least 2 arguments, and the path may only produce 1
-		const history = multiply(identity(2), ...context.path.map(event => projector(spinStates[event])));
+		const history = multiply(identity(2), ...context.path.map(eventId => event(eventId)));
 		return probability(history);
 	}, {leavesOnly: true, pathFormat: 'array'});
 }

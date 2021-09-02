@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-	entry: './src/gui.js',
+	entry: './src/physics.js',
 	mode: 'development',
 	output: {
 		path: path.resolve(__dirname, 'dist'),
