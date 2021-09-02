@@ -1,22 +1,13 @@
-import {sqrt, complex, matrix, kron, ctranspose, multiply, add, trace, re, identity, cos, sin, exp, pi} from 'mathjs';
+import {complex, matrix, kron, ctranspose, multiply, add, trace, re, identity, cos, sin, exp, pi} from 'mathjs';
 import mapValuesDeep from 'deepdash/mapValuesDeep';
 
+/*
+	Returns a spin-up or spin-down state in the basis defined by polar angle theta and azimuthal angle phi
+*/
 function spinState(up, theta, phi) {
-	return up ? matrix([[cos(theta / 2), sin(theta / 2) * exp(complex(0, phi))]])
-		: matrix([[sin(theta / 2), -1 * cos(theta / 2) * exp(complex(0, phi))]]);
+	return up ? matrix([[cos(theta / 2), multiply(sin(theta / 2), exp(complex(0, phi)))]])
+		: matrix([[sin(theta / 2), multiply(-cos(theta / 2), exp(complex(0, phi)))]]);
 }
-
-// Spin eigenstates for X,Y,Z bases, in "bra" form
-const spinStates = {
-	zUp: matrix([[1, 0]]),
-	zDown: matrix([[0, 1]]),
-
-	xUp: matrix([[1 / sqrt(2), 1 / sqrt(2)]]),
-	xDown: matrix([[1 / sqrt(2), -1 / sqrt(2)]]),
-
-	yUp: matrix([[1 / sqrt(2), complex(0, 1 / sqrt(2))]]),
-	yDown: matrix([[1 / sqrt(2), complex(0, -1 / sqrt(2))]]),
-};
 
 function projector(state) {
 	return kron(ctranspose(state), state);
@@ -26,7 +17,7 @@ function projector(state) {
    Leaving the oven, the electron's initial spin state is effectively random due to ignorance of its history
    This is best represented by a mixed-state density matrix
 */
-const densityOperator = add(multiply(projector(spinStates.zUp), 1 / 2), multiply(projector(spinStates.zDown), 1 / 2));
+const densityOperator = add(multiply(projector(spinState(1, 0, 0)), 1 / 2), multiply(projector(spinState(0, 0, 0)), 1 / 2));
 
 // Born Rule for a quantum history (expects a class operator)
 function probability(history) {
@@ -39,8 +30,8 @@ function probability(history) {
 	This contains definitions of the Sx, Sy, and Sz bases
 */
 function event(eventId) {
-	const [direction, up, theta, phi] = eventId.split(',');
-	switch (direction) {
+	const [basis, up, theta, phi] = eventId.split(',');
+	switch (basis) {
 		case 'z':
 			return projector(spinState((up === 'up') ? 1 : 0, 0, 0));
 		case 'x':

@@ -5,8 +5,8 @@ import {round} from 'mathjs';
 
 const histories = {
 	'z,up': {
-		'x,up': {},
-		'x,down': {},
+		'n,up,1.57,1.57': {},
+		'n,down,1.57,1.57': {},
 	},
 	'z,down': {
 	},
@@ -29,7 +29,8 @@ root.descendants().forEach((d, i) => {
 	d.id = i;
 	// Label analyzers
 	if (isPlainObject(d.data)) {
-		d.name = `S${Object.keys(d.data)[0][0]}`;
+		const [basis, up, theta, phi] = Object.keys(d.data)[0].split(',');
+		d.name = (basis === 'n') ? `S${basis},${theta},${phi}` : `S${basis}`;
 	}
 
 	// Label probabilities at leaves
