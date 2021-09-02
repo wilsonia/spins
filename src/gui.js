@@ -1,53 +1,25 @@
 import {computeProbabilities} from './physics.js';
 import * as d3 from 'd3';
+import isPlainObject from 'lodash/isPlainObject';
 import {round} from 'mathjs';
 
 const histories = {
-	type: '',
-	event: '',
-	basis: '',
-	children: [
-		{
-			type: 'spin',
-			event: 'up',
-			basis: 'z',
-			children: [],
+	zUp: {
+		xUp: {},
+		xDown: {},
+	},
+	zDown: {
+		yUp: {},
+		yDown: {
+			zUp: {},
+			zDown: {},
 		},
-		{
-			type: 'spin',
-			event: 'down',
-			basis: 'z',
-			children: [
-				{
-					type: 'spin',
-					event: 'up',
-					basis: 'x',
-					children: [],
-				},
-				{
-					type: 'spin',
-					event: 'down',
-					basis: 'x',
-					children: [],
-				},
-			],
-		},
-	],
+	},
 };
-
-const typeMap = {
-	spin: 'S',
-	magnet: 'M',
-};
-
-function labelNode(data) {
-	const child = data.children[0];
-	return (child) ? `${typeMap[child.type]}${child.basis}` : data;
-}
 
 const margin = {top: 10, right: 120, bottom: 10, left: 40};
 const width = d3.width || 960;
-const root = d3.hierarchy(histories);
+const root = d3.hierarchy(computeProbabilities(histories), branch => Object.values(branch));
 const dx = width / 10;
 const dy = width / 6;
 const tree = d3.tree().nodeSize([dx, dy]);
@@ -60,7 +32,15 @@ root.x0 = dy / 2;
 root.y0 = 0;
 root.descendants().forEach((d, i) => {
 	d.id = i;
-	d.name = labelNode(d.data);
+	// Label analyzers
+	if (isPlainObject(d.data)) {
+		d.name = `S${Object.keys(d.data)[0][0]}`;
+	}
+
+	// Label probabilities at leaves
+	if (typeof d.data === 'number') {
+		d.name = round(d.data, 2);
+	}
 });
 
 tree(root);

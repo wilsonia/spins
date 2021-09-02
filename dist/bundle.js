@@ -49,6 +49,106 @@ eval("/*\n * Natural Sort algorithm for Javascript - Version 0.7 - Released unde
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_Symbol.js":
+/*!****************************************!*\
+  !*** ./node_modules/lodash/_Symbol.js ***!
+  \****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+eval("var root = __webpack_require__(/*! ./_root */ \"./node_modules/lodash/_root.js\");\n\n/** Built-in value references. */\nvar Symbol = root.Symbol;\n\nmodule.exports = Symbol;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/_Symbol.js?");
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseGetTag.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_baseGetTag.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+eval("var Symbol = __webpack_require__(/*! ./_Symbol */ \"./node_modules/lodash/_Symbol.js\"),\n    getRawTag = __webpack_require__(/*! ./_getRawTag */ \"./node_modules/lodash/_getRawTag.js\"),\n    objectToString = __webpack_require__(/*! ./_objectToString */ \"./node_modules/lodash/_objectToString.js\");\n\n/** `Object#toString` result references. */\nvar nullTag = '[object Null]',\n    undefinedTag = '[object Undefined]';\n\n/** Built-in value references. */\nvar symToStringTag = Symbol ? Symbol.toStringTag : undefined;\n\n/**\n * The base implementation of `getTag` without fallbacks for buggy environments.\n *\n * @private\n * @param {*} value The value to query.\n * @returns {string} Returns the `toStringTag`.\n */\nfunction baseGetTag(value) {\n  if (value == null) {\n    return value === undefined ? undefinedTag : nullTag;\n  }\n  return (symToStringTag && symToStringTag in Object(value))\n    ? getRawTag(value)\n    : objectToString(value);\n}\n\nmodule.exports = baseGetTag;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/_baseGetTag.js?");
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_freeGlobal.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_freeGlobal.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+eval("/** Detect free variable `global` from Node.js. */\nvar freeGlobal = typeof __webpack_require__.g == 'object' && __webpack_require__.g && __webpack_require__.g.Object === Object && __webpack_require__.g;\n\nmodule.exports = freeGlobal;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/_freeGlobal.js?");
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getPrototype.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_getPrototype.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+eval("var overArg = __webpack_require__(/*! ./_overArg */ \"./node_modules/lodash/_overArg.js\");\n\n/** Built-in value references. */\nvar getPrototype = overArg(Object.getPrototypeOf, Object);\n\nmodule.exports = getPrototype;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/_getPrototype.js?");
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getRawTag.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_getRawTag.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+eval("var Symbol = __webpack_require__(/*! ./_Symbol */ \"./node_modules/lodash/_Symbol.js\");\n\n/** Used for built-in method references. */\nvar objectProto = Object.prototype;\n\n/** Used to check objects for own properties. */\nvar hasOwnProperty = objectProto.hasOwnProperty;\n\n/**\n * Used to resolve the\n * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)\n * of values.\n */\nvar nativeObjectToString = objectProto.toString;\n\n/** Built-in value references. */\nvar symToStringTag = Symbol ? Symbol.toStringTag : undefined;\n\n/**\n * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.\n *\n * @private\n * @param {*} value The value to query.\n * @returns {string} Returns the raw `toStringTag`.\n */\nfunction getRawTag(value) {\n  var isOwn = hasOwnProperty.call(value, symToStringTag),\n      tag = value[symToStringTag];\n\n  try {\n    value[symToStringTag] = undefined;\n    var unmasked = true;\n  } catch (e) {}\n\n  var result = nativeObjectToString.call(value);\n  if (unmasked) {\n    if (isOwn) {\n      value[symToStringTag] = tag;\n    } else {\n      delete value[symToStringTag];\n    }\n  }\n  return result;\n}\n\nmodule.exports = getRawTag;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/_getRawTag.js?");
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_objectToString.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_objectToString.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+eval("/** Used for built-in method references. */\nvar objectProto = Object.prototype;\n\n/**\n * Used to resolve the\n * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)\n * of values.\n */\nvar nativeObjectToString = objectProto.toString;\n\n/**\n * Converts `value` to a string using `Object.prototype.toString`.\n *\n * @private\n * @param {*} value The value to convert.\n * @returns {string} Returns the converted string.\n */\nfunction objectToString(value) {\n  return nativeObjectToString.call(value);\n}\n\nmodule.exports = objectToString;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/_objectToString.js?");
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_overArg.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_overArg.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+eval("/**\n * Creates a unary function that invokes `func` with its argument transformed.\n *\n * @private\n * @param {Function} func The function to wrap.\n * @param {Function} transform The argument transform.\n * @returns {Function} Returns the new function.\n */\nfunction overArg(func, transform) {\n  return function(arg) {\n    return func(transform(arg));\n  };\n}\n\nmodule.exports = overArg;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/_overArg.js?");
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_root.js":
+/*!**************************************!*\
+  !*** ./node_modules/lodash/_root.js ***!
+  \**************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+eval("var freeGlobal = __webpack_require__(/*! ./_freeGlobal */ \"./node_modules/lodash/_freeGlobal.js\");\n\n/** Detect free variable `self`. */\nvar freeSelf = typeof self == 'object' && self && self.Object === Object && self;\n\n/** Used as a reference to the global object. */\nvar root = freeGlobal || freeSelf || Function('return this')();\n\nmodule.exports = root;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/_root.js?");
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isObjectLike.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/isObjectLike.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+eval("/**\n * Checks if `value` is object-like. A value is object-like if it's not `null`\n * and has a `typeof` result of \"object\".\n *\n * @static\n * @memberOf _\n * @since 4.0.0\n * @category Lang\n * @param {*} value The value to check.\n * @returns {boolean} Returns `true` if `value` is object-like, else `false`.\n * @example\n *\n * _.isObjectLike({});\n * // => true\n *\n * _.isObjectLike([1, 2, 3]);\n * // => true\n *\n * _.isObjectLike(_.noop);\n * // => false\n *\n * _.isObjectLike(null);\n * // => false\n */\nfunction isObjectLike(value) {\n  return value != null && typeof value == 'object';\n}\n\nmodule.exports = isObjectLike;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/isObjectLike.js?");
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isPlainObject.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/isPlainObject.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+eval("var baseGetTag = __webpack_require__(/*! ./_baseGetTag */ \"./node_modules/lodash/_baseGetTag.js\"),\n    getPrototype = __webpack_require__(/*! ./_getPrototype */ \"./node_modules/lodash/_getPrototype.js\"),\n    isObjectLike = __webpack_require__(/*! ./isObjectLike */ \"./node_modules/lodash/isObjectLike.js\");\n\n/** `Object#toString` result references. */\nvar objectTag = '[object Object]';\n\n/** Used for built-in method references. */\nvar funcProto = Function.prototype,\n    objectProto = Object.prototype;\n\n/** Used to resolve the decompiled source of functions. */\nvar funcToString = funcProto.toString;\n\n/** Used to check objects for own properties. */\nvar hasOwnProperty = objectProto.hasOwnProperty;\n\n/** Used to infer the `Object` constructor. */\nvar objectCtorString = funcToString.call(Object);\n\n/**\n * Checks if `value` is a plain object, that is, an object created by the\n * `Object` constructor or one with a `[[Prototype]]` of `null`.\n *\n * @static\n * @memberOf _\n * @since 0.8.0\n * @category Lang\n * @param {*} value The value to check.\n * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.\n * @example\n *\n * function Foo() {\n *   this.a = 1;\n * }\n *\n * _.isPlainObject(new Foo);\n * // => false\n *\n * _.isPlainObject([1, 2, 3]);\n * // => false\n *\n * _.isPlainObject({ 'x': 0, 'y': 0 });\n * // => true\n *\n * _.isPlainObject(Object.create(null));\n * // => true\n */\nfunction isPlainObject(value) {\n  if (!isObjectLike(value) || baseGetTag(value) != objectTag) {\n    return false;\n  }\n  var proto = getPrototype(value);\n  if (proto === null) {\n    return true;\n  }\n  var Ctor = hasOwnProperty.call(proto, 'constructor') && proto.constructor;\n  return typeof Ctor == 'function' && Ctor instanceof Ctor &&\n    funcToString.call(Ctor) == objectCtorString;\n}\n\nmodule.exports = isPlainObject;\n\n\n//# sourceURL=webpack:///./node_modules/lodash/isPlainObject.js?");
+
+/***/ }),
+
 /***/ "./node_modules/mathjs/node_modules/seedrandom/index.js":
 /*!**************************************************************!*\
   !*** ./node_modules/mathjs/node_modules/seedrandom/index.js ***!
@@ -147,7 +247,7 @@ eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPAC
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _physics_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./physics.js */ \"./src/physics.js\");\n/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! d3 */ \"./node_modules/d3/src/index.js\");\n\n\n\n\nconst histories = {\n\ttype: '',\n\tevent: '',\n\tbasis: '',\n\tchildren: [\n\t\t{\n\t\t\ttype: 'spin',\n\t\t\tevent: 'up',\n\t\t\tbasis: 'z',\n\t\t\tchildren: [],\n\t\t},\n\t\t{\n\t\t\ttype: 'spin',\n\t\t\tevent: 'down',\n\t\t\tbasis: 'z',\n\t\t\tchildren: [\n\t\t\t\t{\n\t\t\t\t\ttype: 'spin',\n\t\t\t\t\tevent: 'up',\n\t\t\t\t\tbasis: 'x',\n\t\t\t\t\tchildren: [],\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\ttype: 'spin',\n\t\t\t\t\tevent: 'down',\n\t\t\t\t\tbasis: 'x',\n\t\t\t\t\tchildren: [],\n\t\t\t\t},\n\t\t\t],\n\t\t},\n\t],\n};\n\nconst typeMap = {\n\tspin: 'S',\n\tmagnet: 'M',\n};\n\nfunction labelNode(data) {\n\tconst child = data.children[0];\n\treturn (child) ? `${typeMap[child.type]}${child.basis}` : data;\n}\n\nconst margin = {top: 10, right: 120, bottom: 10, left: 40};\nconst width = d3__WEBPACK_IMPORTED_MODULE_1__.width || 960;\nconst root = d3__WEBPACK_IMPORTED_MODULE_1__.hierarchy(histories);\nconst dx = width / 10;\nconst dy = width / 6;\nconst tree = d3__WEBPACK_IMPORTED_MODULE_1__.tree().nodeSize([dx, dy]);\nconst diagonal = d3__WEBPACK_IMPORTED_MODULE_1__.linkHorizontal()\n\t.x(d => d.y)\n\t.y(d => d.x);\n\nroot.x0 = dy / 2;\nroot.y0 = 0;\nroot.descendants().forEach((d, i) => {\n\td.id = i;\n\td.name = labelNode(d.data);\n});\n\ntree(root);\n\nconst svg = d3__WEBPACK_IMPORTED_MODULE_1__.create('svg')\n\t.attr('viewBox', [-margin.left, -margin.top, width, dx])\n\t.style('font', '10px sans-serif')\n\t.style('user-select', 'none');\n\nconst gLink = svg\n\t.append('g')\n\t.attr('fill', 'none')\n\t.attr('stroke', '#555')\n\t.attr('stroke-opacity', 0.4)\n\t.attr('stroke-width', 1.5);\n\nconst gNode = svg\n\t.append('g')\n\t.attr('cursor', 'pointer')\n\t.attr('pointer-events', 'all');\n\nupdate(root);\n\ndocument.querySelector('#app').appendChild(svg.node());\n\nfunction update(source) {\n\tconst duration = d3__WEBPACK_IMPORTED_MODULE_1__.event && d3__WEBPACK_IMPORTED_MODULE_1__.event.altKey ? 2500 : 250;\n\tconst nodes = root.descendants().reverse();\n\tconst links = root.links();\n\n\t// Compute the new tree layout.\n\n\tlet left = root;\n\tlet right = root;\n\troot.eachBefore(node => {\n\t\tif (node.x < left.x) {\n\t\t\tleft = node;\n\t\t}\n\n\t\tif (node.x > right.x) {\n\t\t\tright = node;\n\t\t}\n\t});\n\n\tconst height = right.x - left.x + margin.top + margin.bottom;\n\n\tconst transition = svg\n\t\t.transition()\n\t\t.duration(duration)\n\t\t.attr('viewBox', [-margin.left, left.x - margin.top, width, height])\n\t\t.tween(\n\t\t\t'resize',\n\t\t\twindow.ResizeObserver ? null : () => () => svg.dispatch('toggle'),\n\t\t);\n\n\t// Update the nodes…\n\tconst node = gNode.selectAll('g').data(nodes, d => d.id);\n\n\t// Enter any new nodes at the parent's previous position.\n\tconst nodeEnter = node\n\t\t.enter()\n\t\t.append('g')\n\t\t.attr('transform', () => `translate(${source.y0},${source.x0})`)\n\t\t.attr('fill-opacity', 0)\n\t\t.attr('stroke-opacity', 0)\n\t\t.on('click', (event, d) => {\n\t\t\tupdate(d);\n\t\t});\n\n\tnodeEnter\n\t\t.append('circle')\n\t\t.attr('r', 2.5)\n\t\t.attr('fill', '#555')\n\t\t.attr('stroke-width', 10);\n\n\tnodeEnter\n\t\t.append('text')\n\t\t.attr('dy', '0.31em')\n\t\t.attr('x', 6)\n\t\t.attr('text-anchor', 'start')\n\t\t.text(d => d.name)\n\t\t.clone(true)\n\t\t.lower()\n\t\t.attr('stroke-linejoin', 'round')\n\t\t.attr('stroke-width', 3)\n\t\t.attr('stroke', 'white');\n\n\t// Transition nodes to their new position.\n\tnode\n\t\t.merge(nodeEnter)\n\t\t.transition(transition)\n\t\t.attr('transform', d => `translate(${d.y},${d.x})`)\n\t\t.attr('fill-opacity', 1)\n\t\t.attr('stroke-opacity', 1);\n\n\t// Transition exiting nodes to the parent's new position.\n\tnode\n\t\t.exit()\n\t\t.transition(transition)\n\t\t.remove()\n\t\t.attr('transform', () => `translate(${source.y},${source.x})`)\n\t\t.attr('fill-opacity', 0)\n\t\t.attr('stroke-opacity', 0);\n\n\t// Update the links…\n\tconst link = gLink.selectAll('path').data(links, d => d.target.id);\n\n\t// Enter any new links at the parent's previous position.\n\tconst linkEnter = link\n\t\t.enter()\n\t\t.append('path')\n\t\t.attr('d', () => {\n\t\t\tconst o = {x: source.x0, y: source.y0};\n\t\t\treturn diagonal({source: o, target: o});\n\t\t});\n\n\t// Transition links to their new position.\n\tlink.merge(linkEnter).transition(transition).attr('d', diagonal);\n\n\t// Transition exiting nodes to the parent's new position.\n\tlink\n\t\t.exit()\n\t\t.transition(transition)\n\t\t.remove()\n\t\t.attr('d', () => {\n\t\t\tconst o = {x: source.x, y: source.y};\n\t\t\treturn diagonal({source: o, target: o});\n\t\t});\n\n\t// Stash the old positions for transition.\n\troot.eachBefore(d => {\n\t\td.x0 = d.x;\n\t\td.y0 = d.y;\n\t});\n}\n\n\n//# sourceURL=webpack:///./src/gui.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _physics_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./physics.js */ \"./src/physics.js\");\n/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! d3 */ \"./node_modules/d3/src/index.js\");\n/* harmony import */ var lodash_isPlainObject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lodash/isPlainObject */ \"./node_modules/lodash/isPlainObject.js\");\n/* harmony import */ var lodash_isPlainObject__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(lodash_isPlainObject__WEBPACK_IMPORTED_MODULE_2__);\n/* harmony import */ var mathjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! mathjs */ \"./node_modules/mathjs/lib/esm/entry/pureFunctionsAny.generated.js\");\n\n\n\n\n\nconst histories = {\n\tzUp: {\n\t\txUp: {},\n\t\txDown: {},\n\t},\n\tzDown: {\n\t\tyUp: {},\n\t\tyDown: {\n\t\t\tzUp: {},\n\t\t\tzDown: {},\n\t\t},\n\t},\n};\n\nconst margin = {top: 10, right: 120, bottom: 10, left: 40};\nconst width = d3__WEBPACK_IMPORTED_MODULE_1__.width || 960;\nconst root = d3__WEBPACK_IMPORTED_MODULE_1__.hierarchy((0,_physics_js__WEBPACK_IMPORTED_MODULE_0__.computeProbabilities)(histories), branch => Object.values(branch));\nconst dx = width / 10;\nconst dy = width / 6;\nconst tree = d3__WEBPACK_IMPORTED_MODULE_1__.tree().nodeSize([dx, dy]);\nconst diagonal = d3__WEBPACK_IMPORTED_MODULE_1__.linkHorizontal()\n\t.x(d => d.y)\n\t.y(d => d.x);\n\nroot.x0 = dy / 2;\nroot.y0 = 0;\nroot.descendants().forEach((d, i) => {\n\td.id = i;\n\t// Label analyzers\n\tif (lodash_isPlainObject__WEBPACK_IMPORTED_MODULE_2___default()(d.data)) {\n\t\td.name = `S${Object.keys(d.data)[0][0]}`;\n\t}\n\n\t// Label probabilities at leaves\n\tif (typeof d.data === 'number') {\n\t\td.name = (0,mathjs__WEBPACK_IMPORTED_MODULE_3__.round)(d.data, 2);\n\t}\n});\n\ntree(root);\n\nconst svg = d3__WEBPACK_IMPORTED_MODULE_1__.create('svg')\n\t.attr('viewBox', [-margin.left, -margin.top, width, dx])\n\t.style('font', '10px sans-serif')\n\t.style('user-select', 'none');\n\nconst gLink = svg\n\t.append('g')\n\t.attr('fill', 'none')\n\t.attr('stroke', '#555')\n\t.attr('stroke-opacity', 0.4)\n\t.attr('stroke-width', 1.5);\n\nconst gNode = svg\n\t.append('g')\n\t.attr('cursor', 'pointer')\n\t.attr('pointer-events', 'all');\n\nupdate(root);\n\ndocument.querySelector('#app').appendChild(svg.node());\n\nfunction update(source) {\n\tconst duration = d3__WEBPACK_IMPORTED_MODULE_1__.event && d3__WEBPACK_IMPORTED_MODULE_1__.event.altKey ? 2500 : 250;\n\tconst nodes = root.descendants().reverse();\n\tconst links = root.links();\n\n\t// Compute the new tree layout.\n\n\tlet left = root;\n\tlet right = root;\n\troot.eachBefore(node => {\n\t\tif (node.x < left.x) {\n\t\t\tleft = node;\n\t\t}\n\n\t\tif (node.x > right.x) {\n\t\t\tright = node;\n\t\t}\n\t});\n\n\tconst height = right.x - left.x + margin.top + margin.bottom;\n\n\tconst transition = svg\n\t\t.transition()\n\t\t.duration(duration)\n\t\t.attr('viewBox', [-margin.left, left.x - margin.top, width, height])\n\t\t.tween(\n\t\t\t'resize',\n\t\t\twindow.ResizeObserver ? null : () => () => svg.dispatch('toggle'),\n\t\t);\n\n\t// Update the nodes…\n\tconst node = gNode.selectAll('g').data(nodes, d => d.id);\n\n\t// Enter any new nodes at the parent's previous position.\n\tconst nodeEnter = node\n\t\t.enter()\n\t\t.append('g')\n\t\t.attr('transform', () => `translate(${source.y0},${source.x0})`)\n\t\t.attr('fill-opacity', 0)\n\t\t.attr('stroke-opacity', 0)\n\t\t.on('click', (event, d) => {\n\t\t\tupdate(d);\n\t\t});\n\n\tnodeEnter\n\t\t.append('circle')\n\t\t.attr('r', 2.5)\n\t\t.attr('fill', '#555')\n\t\t.attr('stroke-width', 10);\n\n\tnodeEnter\n\t\t.append('text')\n\t\t.attr('dy', '0.31em')\n\t\t.attr('x', 6)\n\t\t.attr('text-anchor', 'start')\n\t\t.text(d => d.name)\n\t\t.clone(true)\n\t\t.lower()\n\t\t.attr('stroke-linejoin', 'round')\n\t\t.attr('stroke-width', 3)\n\t\t.attr('stroke', 'white');\n\n\t// Transition nodes to their new position.\n\tnode\n\t\t.merge(nodeEnter)\n\t\t.transition(transition)\n\t\t.attr('transform', d => `translate(${d.y},${d.x})`)\n\t\t.attr('fill-opacity', 1)\n\t\t.attr('stroke-opacity', 1);\n\n\t// Transition exiting nodes to the parent's new position.\n\tnode\n\t\t.exit()\n\t\t.transition(transition)\n\t\t.remove()\n\t\t.attr('transform', () => `translate(${source.y},${source.x})`)\n\t\t.attr('fill-opacity', 0)\n\t\t.attr('stroke-opacity', 0);\n\n\t// Update the links…\n\tconst link = gLink.selectAll('path').data(links, d => d.target.id);\n\n\t// Enter any new links at the parent's previous position.\n\tconst linkEnter = link\n\t\t.enter()\n\t\t.append('path')\n\t\t.attr('d', () => {\n\t\t\tconst o = {x: source.x0, y: source.y0};\n\t\t\treturn diagonal({source: o, target: o});\n\t\t});\n\n\t// Transition links to their new position.\n\tlink.merge(linkEnter).transition(transition).attr('d', diagonal);\n\n\t// Transition exiting nodes to the parent's new position.\n\tlink\n\t\t.exit()\n\t\t.transition(transition)\n\t\t.remove()\n\t\t.attr('d', () => {\n\t\t\tconst o = {x: source.x, y: source.y};\n\t\t\treturn diagonal({source: o, target: o});\n\t\t});\n\n\t// Stash the old positions for transition.\n\troot.eachBefore(d => {\n\t\td.x0 = d.x;\n\t\td.y0 = d.y;\n\t});\n}\n\n\n//# sourceURL=webpack:///./src/gui.js?");
 
 /***/ }),
 
@@ -11698,6 +11798,18 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 		__webpack_require__.amdO = {};
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -11708,6 +11820,18 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 				}
 /******/ 			}
 /******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
