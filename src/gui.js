@@ -4,16 +4,11 @@ import isPlainObject from 'lodash/isPlainObject';
 import {round} from 'mathjs';
 
 const histories = {
-	zUp: {
-		xUp: {},
-		xDown: {},
+	'z,up': {
+		'x,up': {},
+		'x,down': {},
 	},
-	zDown: {
-		yUp: {},
-		yDown: {
-			zUp: {},
-			zDown: {},
-		},
+	'z,down': {
 	},
 };
 
