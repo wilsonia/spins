@@ -2,6 +2,7 @@ import {computeProbabilities} from './physics.js';
 import * as d3 from 'd3';
 import isPlainObject from 'lodash/isPlainObject';
 import {round} from 'mathjs';
+import katex from 'katex';
 
 const histories = {
 	'z,up': {
@@ -25,12 +26,14 @@ const histories = {
 	},
 };
 
-const margin = {top: 100, right: 120, bottom: 100, left: 100};
-const width = d3.width || 960;
+const margin = {top: 100, right: 120, bottom: 200, left: 100};
+const width = d3.width || 500;
+const height = d3.height || 650;
 const root = d3.hierarchy(computeProbabilities(histories), branch => Object.values(branch));
-const dx = width / 12;
-const dy = width / 5;
-const tree = d3.tree().nodeSize([dx, dy]);
+const dx = width / 10;
+const dy = height / 10;
+const nodeLength = 2 * dx;
+const tree = d3.tree().size([width, height]).nodeSize([1.2 * nodeLength, 2.5 * nodeLength]);
 const diagonal = d3
 	.linkHorizontal()
 	.x(d => d.y)
@@ -43,9 +46,9 @@ root.descendants().forEach((d, i) => {
 	// Label analyzers
 	if (isPlainObject(d.data)) {
 		const [basis, , theta, phi] = Object.keys(d.data)[0].split(',');
-		d.basis = `S${basis}`;
-		d.theta = (basis === 'n') ? `theta = ${round(theta, 2)}` : '';
-		d.phi = (basis === 'n') ? `phi = ${round(phi, 2)}` : '';
+		d.basis = basis;
+		d.theta = (basis === 'n') ? round(theta, 2) : '';
+		d.phi = (basis === 'n') ? round(phi, 2) : '';
 	}
 
 	// Label probabilities at leaves
@@ -58,7 +61,7 @@ tree(root);
 
 const svg = d3
 	.create('svg')
-	.attr('viewBox', [-margin.left, -margin.top, width, dx])
+	.attr('viewBox', [-margin.left, -margin.top, width * 2, height + margin.bottom])
 	.style('font', '10px sans-serif')
 	.style('user-select', 'none');
 
@@ -97,12 +100,10 @@ function update(source) {
 		}
 	});
 
-	const height = right.x - left.x + margin.top + margin.bottom;
-
 	const transition = svg
 		.transition()
 		.duration(duration)
-		.attr('viewBox', [-margin.left, left.x - margin.top, width, height])
+		.attr('viewBox', [-margin.left, left.x - margin.top, width * 2, height + margin.bottom])
 		.tween(
 			'resize',
 			window.ResizeObserver ? null : () => () => svg.dispatch('toggle'),
@@ -123,56 +124,41 @@ function update(source) {
 
 	nodeEnter
 		.append('rect')
-		.attr('width', 1.25 * dx)
-		.attr('height', 0.8 * dx)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength)
 		.attr('fill', 'white')
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey');
 
 	nodeEnter
-		.append('text')
-		.attr('dy', '0.31em')
-		.attr('x', 6)
-		.attr('y', 0.2 * dx)
-		.attr('text-anchor', 'start')
-		.text(d => d.basis)
-		.clone(true)
-		.lower()
-		.attr('stroke-linejoin', 'round')
-		.attr('stroke-width', 3)
-		.attr('stroke', 'white');
+		.append('foreignObject')
+		.attr('width', 480)
+		.attr('height', 500)
+		.attr('y', 0.1 * dx)
+		.append('xhtml:body')
+		.html(d => katex.renderToString(`\\LARGE{\\hat{${d.basis}}}`));
 
 	nodeEnter
-		.append('text')
-		.attr('dy', '0.31em')
-		.attr('x', 6)
+		.append('foreignObject')
+		.attr('width', 480)
+		.attr('height', 500)
 		.attr('y', 0.4 * dx)
-		.attr('text-anchor', 'start')
-		.text(d => d.theta)
-		.clone(true)
-		.lower()
-		.attr('stroke-linejoin', 'round')
-		.attr('stroke-width', 3)
-		.attr('stroke', 'white');
+		.append('xhtml:body')
+		.html(d => katex.renderToString(d.theta ? `\\theta = ${d.theta}` : ''));
 
 	nodeEnter
-		.append('text')
-		.attr('dy', '0.31em')
-		.attr('x', 6)
+		.append('foreignObject')
+		.attr('width', 480)
+		.attr('height', 500)
 		.attr('y', 0.6 * dx)
-		.attr('text-anchor', 'start')
-		.text(d => d.phi)
-		.clone(true)
-		.lower()
-		.attr('stroke-linejoin', 'round')
-		.attr('stroke-width', 3)
-		.attr('stroke', 'white');
+		.append('xhtml:body')
+		.html(d => katex.renderToString(d.theta ? `\\phi = ${d.phi}` : ''));
 
 	// Transition nodes to their new position.
 	node
 		.merge(nodeEnter)
 		.transition(transition)
-		.attr('transform', d => `translate(${d.y - (1.25 * dx / 2)},${d.x - (0.8 * dx / 2)})`)
+		.attr('transform', d => `translate(${d.y - (nodeLength / 2)},${d.x - (nodeLength / 2)})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
 
