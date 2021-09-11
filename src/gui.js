@@ -36,6 +36,16 @@ const svg = d3
 	.attr('viewBox', [-margin.left, -margin.top, width, dx])
 	.style('font', '10px sans-serif')
 	.style('user-select', 'none');
+const gLink = svg
+	.append('g')
+	.attr('fill', 'none')
+	.attr('stroke', '#555')
+	.attr('stroke-opacity', 0.4)
+	.attr('stroke-width', 1.5);
+const gNode = svg
+	.append('g')
+	.attr('cursor', 'pointer')
+	.attr('pointer-events', 'all');
 document.querySelector('#app').appendChild(svg.node());
 
 // Configures a d3 hierarchy for a given set of histories
@@ -69,6 +79,7 @@ function update(source) {
 	const nodes = root.descendants().reverse();
 	const links = root.links();
 
+	// Set svg size
 	let left = root;
 	let right = root;
 	root.eachBefore(node => {
@@ -82,7 +93,6 @@ function update(source) {
 	});
 
 	const height = right.x - left.x + margin.top + margin.bottom;
-
 	const transition = svg
 		.transition()
 		.duration(duration)
@@ -92,28 +102,18 @@ function update(source) {
 			window.ResizeObserver ? null : () => () => svg.dispatch('toggle'),
 		);
 
-	// Update the nodes…
-	const gLink = svg
-		.append('g')
-		.attr('fill', 'none')
-		.attr('stroke', '#555')
-		.attr('stroke-opacity', 0.4)
-		.attr('stroke-width', 1.5);
-	const gNode = svg
-		.append('g')
-		.attr('cursor', 'pointer')
-		.attr('pointer-events', 'all');
-	const node = gNode.selectAll('g').data(nodes, d => d.id);
+	const analyzers = gNode.selectAll('g').data(nodes.map(node => isPlainObject(node.data) ? node : {}), d => d.id);
+	const counters = gNode.selectAll('g').data(nodes.map(node => isPlainObject(node.data) ? {} : node), d => d.id);
 
-	// Enter any new nodes at the parent's previous position.
-	const nodeEnter = node
+	// Draw analyzers
+	const analyzerEnter = analyzers
 		.enter()
 		.append('g')
 		.attr('transform', `translate(${source.y0},${source.x0})`)
 		.attr('fill-opacity', 0)
 		.attr('stroke-opacity', 0);
 
-	nodeEnter
+	analyzerEnter
 		.append('rect')
 		.attr('width', nodeLength)
 		.attr('x', -1 * (nodeLength / 2))
@@ -121,10 +121,9 @@ function update(source) {
 		.attr('height', nodeLength)
 		.attr('fill', 'white')
 		.attr('stroke-width', 2)
-		.attr('stroke', 'grey')
-		.attr('visibility', d => d.basis ? 'visible' : 'hidden');
+		.attr('stroke', 'grey');
 
-	nodeEnter
+	analyzerEnter
 		.append('rect')
 		.attr('width', nodeLength / 4)
 		.attr('height', nodeLength / 2)
@@ -133,13 +132,18 @@ function update(source) {
 		.attr('fill', 'white')
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
-		.attr('visibility', d => d.basis ? 'visible' : 'hidden') // Fix this
 		.on('click', () => {
-			console.log('clicked');
 			// Testing update behavior
 			histories = {
 				'z,up': {
-					'x,up': {},
+					'x,up': {
+						'z,up': {
+
+						},
+						'z,down': {
+
+						},
+					},
 					'x,down': {},
 				},
 				'z,down': {
@@ -149,7 +153,7 @@ function update(source) {
 			update(root);
 		});
 
-	nodeEnter
+	analyzerEnter
 		.append('rect')
 		.attr('width', nodeLength / 4)
 		.attr('height', nodeLength / 2)
@@ -157,28 +161,18 @@ function update(source) {
 		.attr('y', 0)
 		.attr('fill', 'white')
 		.attr('stroke-width', 2)
-		.attr('stroke', 'grey')
-		.attr('visibility', d => d.basis ? 'visible' : 'hidden');
+		.attr('stroke', 'grey');
 
-	nodeEnter
-		.append('foreignObject')
-		.attr('width', nodeLength)
-		.attr('height', nodeLength)
-		.attr('x', 0)
-		.attr('y', -0.15 * nodeLength)
-		.append('xhtml:body')
-		.html(d => katex.renderToString(d.probability ? `\\LARGE{${d.probability}}` : ''));
-
-	nodeEnter
+	analyzerEnter
 		.append('foreignObject')
 		.attr('width', nodeLength)
 		.attr('height', nodeLength)
 		.attr('x', -0.5 * nodeLength)
 		.attr('y', -0.4 * nodeLength)
 		.append('xhtml:body')
-		.html(d => katex.renderToString(d.basis ? `\\Huge{\\hat{${d.basis}}}` : ''));
+		.html(d => katex.renderToString(`\\Huge{\\hat{${d.basis}}}`));
 
-	nodeEnter
+	analyzerEnter
 		.append('foreignObject')
 		.attr('width', nodeLength)
 		.attr('height', nodeLength)
@@ -187,25 +181,59 @@ function update(source) {
 		.append('xhtml:body')
 		.html(d => katex.renderToString(d.theta ? `\\Large{\\theta = ${d.theta}}` : ''));
 
-	nodeEnter
+	analyzerEnter
 		.append('foreignObject')
 		.attr('width', nodeLength)
 		.attr('height', nodeLength)
 		.attr('x', -0.5 * nodeLength)
 		.attr('y', 0.15 * nodeLength)
 		.append('xhtml:body')
-		.html(d => katex.renderToString(d.theta ? `\\Large{\\phi = ${d.phi}}` : ''));
+		.html(d => katex.renderToString(d.phi ? `\\Large{\\phi = ${d.phi}}` : ''));
 
-	// Transition nodes to their new position.
-	node
-		.merge(nodeEnter)
+	// Transition analyzers to their new position.
+	analyzers
+		.merge(analyzerEnter)
 		.transition(transition)
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
 
-	// Transition exiting nodes to the parent's new position.
-	node
+	// Draw counters
+	const counterEnter = counters
+		.enter()
+		.append('g')
+		.attr('transform', `translate(${source.y0},${source.x0})`)
+		.attr('fill-opacity', 0)
+		.attr('stroke-opacity', 0);
+
+	counterEnter
+		.append('foreignObject')
+		.attr('width', nodeLength)
+		.attr('height', nodeLength)
+		.attr('x', 0)
+		.attr('y', -0.15 * nodeLength)
+		.append('xhtml:body')
+		.html(d => katex.renderToString(d.probability ? `\\LARGE{${d.probability}}` : ''));
+
+	// Transition counters to their new position.
+	counters
+		.merge(counterEnter)
+		.transition(transition)
+		.attr('transform', d => `translate(${d.y},${d.x})`)
+		.attr('fill-opacity', 1)
+		.attr('stroke-opacity', 1);
+
+	// Transition exiting analyzers to the parent's new position.
+	analyzers
+		.exit()
+		.transition(transition)
+		.remove()
+		.attr('transform', `translate(${source.y},${source.x})`)
+		.attr('fill-opacity', 0)
+		.attr('stroke-opacity', 0);
+
+	// Transition exiting counters to the parent's new position.
+	counters
 		.exit()
 		.transition(transition)
 		.remove()
