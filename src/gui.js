@@ -36,16 +36,6 @@ const svg = d3
 	.attr('viewBox', [-margin.left, -margin.top, width, dx])
 	.style('font', '10px sans-serif')
 	.style('user-select', 'none');
-const gLink = svg
-	.append('g')
-	.attr('fill', 'none')
-	.attr('stroke', '#555')
-	.attr('stroke-opacity', 0.4)
-	.attr('stroke-width', 1.5);
-const gNode = svg
-	.append('g')
-	.attr('cursor', 'pointer')
-	.attr('pointer-events', 'all');
 document.querySelector('#app').appendChild(svg.node());
 
 // Configures a d3 hierarchy for a given set of histories
@@ -74,7 +64,18 @@ function getRoot(histories) {
 }
 
 // Binds d3 hierarchy to svg nodes and links
-function update(source) {
+function draw(source) {
+	svg.selectAll('*').remove();
+	const gLink = svg
+		.append('g')
+		.attr('fill', 'none')
+		.attr('stroke', '#555')
+		.attr('stroke-opacity', 0.4)
+		.attr('stroke-width', 1.5);
+	const gNode = svg
+		.append('g')
+		.attr('cursor', 'pointer')
+		.attr('pointer-events', 'all');
 	const duration = d3.event && d3.event.altKey ? 2500 : 250;
 	const nodes = root.descendants().reverse();
 	const links = root.links();
@@ -93,7 +94,7 @@ function update(source) {
 	});
 
 	const height = right.x - left.x + margin.top + margin.bottom;
-	const transition = svg
+	svg
 		.transition()
 		.duration(duration)
 		.attr('viewBox', [-margin.left, left.x - margin.top, width, height])
@@ -102,10 +103,8 @@ function update(source) {
 			window.ResizeObserver ? null : () => () => svg.dispatch('toggle'),
 		);
 
-	const analyzers = gNode.selectAll('g').data(nodes.map(node => isPlainObject(node.data) ? node : {}), d => d.id);
-	const counters = gNode.selectAll('g').data(nodes.map(node => isPlainObject(node.data) ? {} : node), d => d.id);
-
 	// Draw analyzers
+	const analyzers = gNode.selectAll('g').data(nodes.filter(node => isPlainObject(node.data)), d => d.id);
 	const analyzerEnter = analyzers
 		.enter()
 		.append('g')
@@ -136,21 +135,14 @@ function update(source) {
 			// Testing update behavior
 			histories = {
 				'z,up': {
-					'x,up': {
-						'z,up': {
-
-						},
-						'z,down': {
-
-						},
-					},
-					'x,down': {},
+					'z,up': {},
+					'z,down': {},
 				},
 				'z,down': {
 				},
 			};
 			root = getRoot(histories);
-			update(root);
+			draw(root);
 		});
 
 	analyzerEnter
@@ -167,7 +159,7 @@ function update(source) {
 		.append('foreignObject')
 		.attr('width', nodeLength)
 		.attr('height', nodeLength)
-		.attr('x', -0.5 * nodeLength)
+		.attr('x', -0.25 * nodeLength)
 		.attr('y', -0.4 * nodeLength)
 		.append('xhtml:body')
 		.html(d => katex.renderToString(`\\Huge{\\hat{${d.basis}}}`));
@@ -190,15 +182,14 @@ function update(source) {
 		.append('xhtml:body')
 		.html(d => katex.renderToString(d.phi ? `\\Large{\\phi = ${d.phi}}` : ''));
 
-	// Transition analyzers to their new position.
 	analyzers
 		.merge(analyzerEnter)
-		.transition(transition)
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
 
 	// Draw counters
+	const counters = gNode.selectAll('g').data(nodes.filter(node => !isPlainObject(node.data)), d => d.id);
 	const counterEnter = counters
 		.enter()
 		.append('g')
@@ -213,33 +204,13 @@ function update(source) {
 		.attr('x', 0)
 		.attr('y', -0.15 * nodeLength)
 		.append('xhtml:body')
-		.html(d => katex.renderToString(d.probability ? `\\LARGE{${d.probability}}` : ''));
+		.html(d => katex.renderToString(`\\LARGE{${d.probability}}`));
 
-	// Transition counters to their new position.
 	counters
 		.merge(counterEnter)
-		.transition(transition)
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
-
-	// Transition exiting analyzers to the parent's new position.
-	analyzers
-		.exit()
-		.transition(transition)
-		.remove()
-		.attr('transform', `translate(${source.y},${source.x})`)
-		.attr('fill-opacity', 0)
-		.attr('stroke-opacity', 0);
-
-	// Transition exiting counters to the parent's new position.
-	counters
-		.exit()
-		.transition(transition)
-		.remove()
-		.attr('transform', `translate(${source.y},${source.x})`)
-		.attr('fill-opacity', 0)
-		.attr('stroke-opacity', 0);
 
 	// Update the links…
 	const link = gLink.selectAll('path').data(links, d => d.target.id);
@@ -253,25 +224,15 @@ function update(source) {
 			return diagonal({source: o, target: o});
 		});
 
-	// Transition links to their new position.
-	link.merge(linkEnter).transition(transition).attr('d', diagonal);
-
-	// Transition exiting nodes to the parent's new position.
+	link.merge(linkEnter).attr('d', diagonal);
 	link
 		.exit()
-		.transition(transition)
 		.remove()
 		.attr('d', () => {
 			const o = {x: source.x, y: source.y};
 			return diagonal({source: o, target: o});
 		});
-
-	// Stash the old positions for transition.
-	root.eachBefore(d => {
-		d.x0 = d.x;
-		d.y0 = d.y;
-	});
 }
 
 let root = getRoot(histories);
-update(root);
+draw(root);
