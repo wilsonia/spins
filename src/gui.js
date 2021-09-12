@@ -27,7 +27,7 @@ const dx = 65;
 const dy = width / 6;
 const diagonal = d3
 	.linkHorizontal()
-	.x(d => d.y)
+	.x(d => d.y - (dy / 4))
 	.y(d => d.x);
 const tree = d3.tree().nodeSize([dx + (nodeLength / 2), dy + (nodeLength / 2)]);
 
@@ -201,8 +201,8 @@ function draw(source) {
 		.append('foreignObject')
 		.attr('width', nodeLength)
 		.attr('height', nodeLength)
-		.attr('x', 0)
-		.attr('y', -0.15 * nodeLength)
+		.attr('x', -0.35 * nodeLength)
+		.attr('y', -0.175 * nodeLength)
 		.append('xhtml:body')
 		.html(d => katex.renderToString(`\\LARGE{${d.probability}}`));
 
