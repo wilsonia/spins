@@ -23,3 +23,9 @@ Several packages were used to reduce code volume and simplify control flow:
 - [d3-hierarchy](https://github.com/d3/d3-hierarchy) for tree visualization
 - [lodash](https://lodash.com) and [deepdash](https://deepdash.io) for tree traversal
 - [katex](https://katex.org/) for math symbol rendering
+
+### Installing
+`npm install`
+
+### Building
+`npm run build`
