@@ -1,1 +1,0 @@
-{"children":[{"basis":"z","event":"spinUp","children":[{"basis":"x","event":"spinUp","children":[]},{"basis":"x","event":"spinDown","children":[{"basis":"n","event":"spinUp","theta":1.57,"phi":1.57,"children":[]},{"basis":"n","theta":1.57,"phi":1.57,"event":"spinDown","children":[]}]}]},{"basis":"z","event":"spinDown","children":[]}]}

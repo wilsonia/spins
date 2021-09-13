@@ -34,7 +34,7 @@ let histories = {
 };
 
 const nodeLength = 120;
-const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength, left: nodeLength};
+const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength * 1.5, left: nodeLength};
 const width = d3.width || 1200;
 const dx = 65;
 const dy = width / 8;
@@ -110,6 +110,7 @@ function basisClick(click) {
 }
 
 function slider(click, angle) {
+	console.log(click);
 	let parent = click.target.__data__;
 	const path = [];
 	while (parent.parent) {
@@ -122,7 +123,7 @@ function slider(click, angle) {
 	path.push('children');
 
 	const angleInit = get(histories, path)[0][angle];
-	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(300).default(angleInit)
+	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(dy * 1.75).default(angleInit)
 		.on('end', value => {
 			histories = set(histories, path, get(histories, path).map(child => {
 				child[angle] = round(value, 2);
@@ -314,8 +315,8 @@ function draw(source) {
 			svg.selectAll('.axis').remove();
 			svg.append('foreignObject')
 				.attr('class', 'axis')
-				.attr('x', `${(click.clientX / 2)}`)
-				.attr('y', `${(click.clientY / 2) - 45}`)
+				.attr('x', `${click.target.__data__.y + (1.25 * dx)}`)
+				.attr('y', `${click.target.__data__.x + (0.75 * dx)}`)
 				.attr('width', nodeLength / 4)
 				.attr('height', nodeLength / 4)
 				.style('ponter-events', 'none')
@@ -323,7 +324,7 @@ function draw(source) {
 				.html(katex.renderToString('\\LARGE{\\theta}'));
 			svg.append('g')
 				.attr('pointer-events', 'all')
-				.attr('transform', `translate(${click.clientX / 2}, ${click.clientY / 2})`)
+				.attr('transform', `translate(${click.target.__data__.y + dx}, ${click.target.__data__.x + (1.4 * dx)})`)
 				.call(slider(click, 'theta'));
 		});
 
@@ -340,7 +341,7 @@ function draw(source) {
 	analyzerEnter
 		.append('rect')
 		.attr('x', -1 * nodeLength / 2)
-		.attr('y', 0.15 * nodeLength)
+		.attr('y', 0.18 * nodeLength)
 		.attr('width', 3 * nodeLength / 4)
 		.attr('height', nodeLength / 4)
 		.attr('opacity', 0)
@@ -350,15 +351,15 @@ function draw(source) {
 			svg.selectAll('.axis').remove();
 			svg.append('foreignObject')
 				.attr('class', 'axis')
-				.attr('x', `${(click.clientX / 2)}`)
-				.attr('y', `${(click.clientY / 2) - 45}`)
+				.attr('x', `${click.target.__data__.y + (1.25 * dx)}`)
+				.attr('y', `${click.target.__data__.x + (0.75 * dx)}`)
 				.attr('width', nodeLength / 4)
 				.attr('height', nodeLength / 4)
 				.style('ponter-events', 'none')
 				.append('xhtml:body')
 				.html(katex.renderToString('\\LARGE{\\phi}'));
 			svg.append('g')
-				.attr('transform', `translate(${click.clientX / 2}, ${click.clientY / 2})`)
+				.attr('transform', `translate(${click.target.__data__.y + dx}, ${click.target.__data__.x + (1.4 * dx)})`)
 				.call(slider(click, 'phi'));
 		});
 
