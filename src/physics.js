@@ -30,17 +30,17 @@ function probability(history) {
 	This contains definitions of the Sx, Sy, and Sz bases
 */
 function event(eventId) {
-	const [basis, up, theta, phi] = eventId.split(',');
+	const [basis, spin, theta, phi] = eventId.split(',');
 	switch (basis) {
 		case 'z':
-			return projector(spinState((up === 'up') ? 1 : 0, 0, 0));
+			return projector(spinState((spin === 'up') ? 1 : 0, 0, 0));
 		case 'x':
-			return projector(spinState((up === 'up') ? 1 : 0, pi / 2, 0));
+			return projector(spinState((spin === 'up') ? 1 : 0, pi / 2, 0));
 		case 'y':
-			return projector(spinState((up === 'up') ? 1 : 0, pi / 2, pi / 2));
+			return projector(spinState((spin === 'up') ? 1 : 0, pi / 2, pi / 2));
 
 		default:
-			return projector(spinState((up === 'up') ? 1 : 0, Number(theta), Number(phi)));
+			return projector(spinState((spin === 'up') ? 1 : 0, Number(theta), Number(phi)));
 	}
 }
 

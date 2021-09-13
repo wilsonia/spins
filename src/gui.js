@@ -1,18 +1,13 @@
 import {computeProbabilities} from './physics.js';
 import * as d3 from 'd3';
 import isPlainObject from 'lodash/isPlainObject';
+import set from 'lodash/set';
 import {round} from 'mathjs';
 import katex from 'katex';
 
 let histories = {
 	'z,up': {
 		'x,up': {
-			'z,up': {
-
-			},
-			'z,down': {
-
-			},
 		},
 		'x,down': {},
 	},
@@ -47,8 +42,9 @@ function getRoot(histories) {
 		d.id = i;
 		// Label analyzers
 		if (isPlainObject(d.data)) {
-			const [basis, , theta, phi] = Object.keys(d.data)[0].split(',');
+			const [basis, spin, theta, phi] = Object.keys(d.data)[0].split(',');
 			d.basis = basis;
+			d.spin = spin;
 			d.theta = (basis === 'n') ? round(theta, 2) : '';
 			d.phi = (basis === 'n') ? round(phi, 2) : '';
 		}
@@ -112,6 +108,7 @@ function draw(source) {
 		.attr('fill-opacity', 0)
 		.attr('stroke-opacity', 0);
 
+	// Draw outline
 	analyzerEnter
 		.append('rect')
 		.attr('width', nodeLength)
@@ -122,29 +119,42 @@ function draw(source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey');
 
+	// Draw spin-up port
+	analyzerEnter
+		.append('foreignObject')
+		.attr('x', nodeLength / 5)
+		.attr('y', -1 * (nodeLength / 2))
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'hidden')
+		.append('xhtml:body')
+		.html(katex.renderToString('\\Huge{\\pmb{+}}'));
+
 	analyzerEnter
 		.append('rect')
 		.attr('width', nodeLength / 4)
 		.attr('height', nodeLength / 2)
 		.attr('x', nodeLength / 4)
 		.attr('y', -1 * (nodeLength / 2))
-		.attr('fill', 'white')
+		.attr('fill', 'transparent')
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
-		.on('click', () => {
-			// Testing update behavior
-			histories = {
-				'z,up': {
-					'z,up': {},
-					'z,down': {},
-				},
-				'z,down': {
-				},
-			};
+		.style('pointer-events', 'visible')
+		.on('click', click => {
+			const path = [`${click.target.__data__.basis},up`];
+			let {parent} = click.target.__data__;
+			while (parent) {
+				path.unshift(`${parent.basis},${parent.spin}`);
+				parent = parent.parent;
+			}
+
+			histories = set(histories, path, {'z,up': {}, 'z,down': {}});
 			root = getRoot(histories);
+			console.log(root);
 			draw(root);
 		});
 
+	// Draw spin-down port
 	analyzerEnter
 		.append('rect')
 		.attr('width', nodeLength / 4)
@@ -157,28 +167,42 @@ function draw(source) {
 
 	analyzerEnter
 		.append('foreignObject')
-		.attr('width', nodeLength)
-		.attr('height', nodeLength)
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'hidden')
+		.attr('x', nodeLength / 5)
+		.attr('y', 0)
+		.append('xhtml:body')
+		.html(katex.renderToString('\\Huge{\\pmb{-}}'));
+
+	// Label analyzers
+	analyzerEnter
+		.append('foreignObject')
 		.attr('x', -0.25 * nodeLength)
 		.attr('y', -0.4 * nodeLength)
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'hidden')
 		.append('xhtml:body')
 		.html(d => katex.renderToString(`\\Huge{\\hat{${d.basis}}}`));
 
 	analyzerEnter
 		.append('foreignObject')
-		.attr('width', nodeLength)
-		.attr('height', nodeLength)
 		.attr('x', -0.5 * nodeLength)
 		.attr('y', -0.05 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 4)
+		.style('pointer-events', 'hidden')
 		.append('xhtml:body')
 		.html(d => katex.renderToString(d.theta ? `\\Large{\\theta = ${d.theta}}` : ''));
 
 	analyzerEnter
 		.append('foreignObject')
-		.attr('width', nodeLength)
-		.attr('height', nodeLength)
 		.attr('x', -0.5 * nodeLength)
 		.attr('y', 0.15 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 4)
+		.style('pointer-events', 'hidden')
 		.append('xhtml:body')
 		.html(d => katex.renderToString(d.phi ? `\\Large{\\phi = ${d.phi}}` : ''));
 
@@ -199,8 +223,9 @@ function draw(source) {
 
 	counterEnter
 		.append('foreignObject')
-		.attr('width', nodeLength)
-		.attr('height', nodeLength)
+		.attr('width', nodeLength / 2)
+		.attr('height', nodeLength / 4)
+		.style('pointer-events', 'hidden')
 		.attr('x', -0.35 * nodeLength)
 		.attr('y', -0.175 * nodeLength)
 		.append('xhtml:body')
