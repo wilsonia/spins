@@ -30,7 +30,7 @@ function probability(history) {
 	Maps a history schema eventId to an event operator
 	This contains definitions of the Sx, Sy, and Sz bases
 */
-function eventProjector(event, basis) {
+function eventProjector(event, basis, theta, phi) {
 	switch (basis) {
 		case 'z':
 			return projector(spinState((event === 'spinUp') ? 1 : 0, 0, 0));
@@ -40,9 +40,7 @@ function eventProjector(event, basis) {
 			return projector(spinState((event === 'spinUp') ? 1 : 0, pi / 2, pi / 2));
 
 		default:
-			return 0;
-	// 	Default:
-	// 		return projector(spinState((spin === 'up') ? 1 : 0, Number(theta), Number(phi)));
+			return projector(spinState((event === 'spinUp') ? 1 : 0, Number(theta), Number(phi)));
 	// }
 	}
 }
@@ -58,8 +56,8 @@ function computeProbabilities(histories) {
 		let path = [];
 		context.path.filter(element => (element !== 'children')).forEach(element => {
 			path = path.concat(['children', element]);
-			const {basis, event} = get(histories, path);
-			history = multiply(eventProjector(event, basis), history);
+			const {basis, event, theta, phi} = get(histories, path);
+			history = multiply(eventProjector(event, basis, theta, phi), history);
 		});
 		value.probability = probability(history);
 		return value;

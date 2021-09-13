@@ -22,12 +22,16 @@ let histories = {
 					event: 'spinDown',
 					children: [
 						{
-							basis: 'z',
+							basis: 'n',
 							event: 'spinUp',
+							theta: 1.57,
+							phi: 1.57,
 							children: [],
 						},
 						{
-							basis: 'z',
+							basis: 'n',
+							theta: 1.57,
+							phi: 1.57,
 							event: 'spinDown',
 							children: [],
 						},
@@ -72,6 +76,10 @@ function getRoot(histories) {
 		if (d.data.children) {
 			if (d.data.children[0]) {
 				d.basis = d.data.children[0].basis;
+				if (d.data.children[0].theta) {
+					d.theta = d.data.children[0].theta;
+					d.phi = d.data.children[0].phi;
+				}
 			}
 		}
 
@@ -102,7 +110,8 @@ function basisClick(click) {
 		child.basis = {
 			z: 'x',
 			x: 'y',
-			y: 'z',
+			y: 'n',
+			n: 'z',
 		}[child.basis];
 		return child;
 	}));
