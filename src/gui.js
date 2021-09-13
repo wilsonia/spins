@@ -1,6 +1,7 @@
 import {computeProbabilities} from './physics.js';
 import * as d3 from 'd3';
 import set from 'lodash/set';
+import get from 'lodash/get';
 import findIndex from 'lodash/findIndex';
 import {round} from 'mathjs';
 import katex from 'katex';
@@ -177,19 +178,20 @@ function draw(source) {
 			}
 
 			path.push('children');
-			histories = set(histories, path, [
-				{
-					basis: 'z',
-					event: 'spinUp',
-					children: [],
-				},
-				{
-					basis: 'z',
-					event: 'spinDown',
-					children: [],
-				},
-			]);
-			console.log(computeProbabilities(histories));
+			histories = set(histories, path, ((get(histories, path).length === 0))
+				? [
+					{
+						basis: 'z',
+						event: 'spinUp',
+						children: [],
+					},
+					{
+						basis: 'z',
+						event: 'spinDown',
+						children: [],
+					},
+				]
+				: []);
 			root = getRoot(histories);
 			draw(root);
 		});
