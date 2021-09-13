@@ -21,22 +21,7 @@ let histories = {
 				{
 					basis: 'x',
 					event: 'spinDown',
-					children: [
-						{
-							basis: 'n',
-							event: 'spinUp',
-							theta: 1.57,
-							phi: 1.57,
-							children: [],
-						},
-						{
-							basis: 'n',
-							theta: 1.57,
-							phi: 1.57,
-							event: 'spinDown',
-							children: [],
-						},
-					],
+					children: [],
 				},
 			],
 		},
@@ -432,3 +417,29 @@ function draw(source) {
 
 let root = getRoot(histories);
 draw(root);
+
+// Config file reader
+document.getElementById('import').onclick = function () {
+	const {files} = document.getElementById('selectFiles');
+	if (files.length <= 0) {
+		return false;
+	}
+
+	const fr = new FileReader();
+	fr.onload = function (e) {
+		histories = JSON.parse(e.target.result);
+		root = getRoot(histories);
+		draw(root);
+	};
+
+	fr.readAsText(files.item(0));
+};
+
+// Config file saver
+document.getElementById('export').onclick = function () {
+	const a = document.createElement('a');
+	const file = new Blob([JSON.stringify(histories, null, 2)], {type: 'application/json'});
+	a.href = URL.createObjectURL(file);
+	a.download = 'histories.json';
+	a.click();
+};
