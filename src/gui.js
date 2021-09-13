@@ -115,6 +115,36 @@ function draw(source) {
 		}
 	});
 
+	function analyzerPortClick(click, event) {
+		let parent = click.target.__data__;
+		const path = ['children', findIndex(parent.children, child =>
+			(child.data.basis === parent.basis & child.data.event === event))];
+		while (parent.parent) {
+			const childIndex = findIndex(parent.parent.data.children, child =>
+				(child.basis === parent.data.basis & child.event === parent.data.event));
+			path.unshift('children', childIndex);
+			parent = parent.parent;
+		}
+
+		path.push('children');
+		histories = set(histories, path, ((get(histories, path).length === 0))
+			? [
+				{
+					basis: 'z',
+					event: 'spinUp',
+					children: [],
+				},
+				{
+					basis: 'z',
+					event: 'spinDown',
+					children: [],
+				},
+			]
+			: []);
+		root = getRoot(histories);
+		draw(root);
+	}
+
 	const height = right.x - left.x + margin.top + margin.bottom;
 	svg
 		.transition()
@@ -152,7 +182,7 @@ function draw(source) {
 		.attr('y', -1 * (nodeLength / 2))
 		.attr('width', nodeLength / 4)
 		.attr('height', nodeLength / 2)
-		.style('pointer-events', 'hidden')
+		.style('pointer-events', 'none')
 		.append('xhtml:body')
 		.html(katex.renderToString('\\Huge{\\pmb{+}}'));
 
@@ -166,56 +196,30 @@ function draw(source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => {
-			let parent = click.target.__data__;
-			const path = ['children', findIndex(parent.children, child =>
-				(child.data.basis === parent.basis & child.data.event === 'spinUp'))];
-			while (parent.parent) {
-				const childIndex = findIndex(parent.parent.data.children, child =>
-					(child.basis === parent.data.basis & child.event === parent.data.event));
-				path.unshift('children', childIndex);
-				parent = parent.parent;
-			}
-
-			path.push('children');
-			histories = set(histories, path, ((get(histories, path).length === 0))
-				? [
-					{
-						basis: 'z',
-						event: 'spinUp',
-						children: [],
-					},
-					{
-						basis: 'z',
-						event: 'spinDown',
-						children: [],
-					},
-				]
-				: []);
-			root = getRoot(histories);
-			draw(root);
-		});
+		.on('click', click => analyzerPortClick(click, 'spinUp'));
 
 	// Draw spin-down port
+	analyzerEnter
+		.append('foreignObject')
+		.attr('x', nodeLength / 5)
+		.attr('y', 0)
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(katex.renderToString('\\Huge{\\pmb{-}}'));
+
 	analyzerEnter
 		.append('rect')
 		.attr('width', nodeLength / 4)
 		.attr('height', nodeLength / 2)
 		.attr('x', nodeLength / 4)
 		.attr('y', 0)
-		.attr('fill', 'white')
+		.attr('fill', 'transparent')
 		.attr('stroke-width', 2)
-		.attr('stroke', 'grey');
-
-	analyzerEnter
-		.append('foreignObject')
-		.attr('width', nodeLength / 4)
-		.attr('height', nodeLength / 2)
-		.style('pointer-events', 'hidden')
-		.attr('x', nodeLength / 5)
-		.attr('y', 0)
-		.append('xhtml:body')
-		.html(katex.renderToString('\\Huge{\\pmb{-}}'));
+		.attr('stroke', 'grey')
+		.style('pointer-events', 'visible')
+		.on('click', click => analyzerPortClick(click, 'spinDown'));
 
 	// Label analyzers
 	analyzerEnter
@@ -224,7 +228,7 @@ function draw(source) {
 		.attr('y', -0.4 * nodeLength)
 		.attr('width', nodeLength / 4)
 		.attr('height', nodeLength / 2)
-		.style('pointer-events', 'hidden')
+		.style('pointer-events', 'none')
 		.append('xhtml:body')
 		.html(d => katex.renderToString(`\\Huge{\\hat{${d.basis}}}`));
 
@@ -234,7 +238,7 @@ function draw(source) {
 		.attr('y', -0.05 * nodeLength)
 		.attr('width', nodeLength)
 		.attr('height', nodeLength / 4)
-		.style('pointer-events', 'hidden')
+		.style('pointer-events', 'none')
 		.append('xhtml:body')
 		.html(d => katex.renderToString(d.theta ? `\\Large{\\theta = ${d.theta}}` : ''));
 
@@ -244,7 +248,7 @@ function draw(source) {
 		.attr('y', 0.15 * nodeLength)
 		.attr('width', nodeLength)
 		.attr('height', nodeLength / 4)
-		.style('pointer-events', 'hidden')
+		.style('pointer-events', 'none')
 		.append('xhtml:body')
 		.html(d => katex.renderToString(d.phi ? `\\Large{\\phi = ${d.phi}}` : ''));
 
@@ -267,7 +271,7 @@ function draw(source) {
 		.append('foreignObject')
 		.attr('width', nodeLength / 2)
 		.attr('height', nodeLength / 4)
-		.style('pointer-events', 'hidden')
+		.style('pointer-events', 'none')
 		.attr('x', -0.35 * nodeLength)
 		.attr('y', -0.175 * nodeLength)
 		.append('xhtml:body')
