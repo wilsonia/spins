@@ -1,5 +1,6 @@
-import {complex, matrix, kron, ctranspose, multiply, add, trace, re, identity, cos, sin, exp, pi} from 'mathjs';
-import mapValuesDeep from 'deepdash/mapValuesDeep';
+import {complex, matrix, kron, ctranspose, multiply, add, trace, identity, re, cos, sin, exp, pi} from 'mathjs';
+import eachDeep from 'deepdash/eachDeep';
+import get from 'lodash/get';
 
 /*
 	Returns a spin-up or spin-down state in the basis defined by polar angle theta and azimuthal angle phi
@@ -29,18 +30,20 @@ function probability(history) {
 	Maps a history schema eventId to an event operator
 	This contains definitions of the Sx, Sy, and Sz bases
 */
-function event(eventId) {
-	const [basis, spin, theta, phi] = eventId.split(',');
+function eventProjector(event, basis) {
 	switch (basis) {
 		case 'z':
-			return projector(spinState((spin === 'up') ? 1 : 0, 0, 0));
+			return projector(spinState((event === 'spinUp') ? 1 : 0, 0, 0));
 		case 'x':
-			return projector(spinState((spin === 'up') ? 1 : 0, pi / 2, 0));
+			return projector(spinState((event === 'spinUp') ? 1 : 0, pi / 2, 0));
 		case 'y':
-			return projector(spinState((spin === 'up') ? 1 : 0, pi / 2, pi / 2));
+			return projector(spinState((event === 'spinUp') ? 1 : 0, pi / 2, pi / 2));
 
 		default:
-			return projector(spinState((spin === 'up') ? 1 : 0, Number(theta), Number(phi)));
+			return 0;
+	// 	Default:
+	// 		return projector(spinState((spin === 'up') ? 1 : 0, Number(theta), Number(phi)));
+	// }
 	}
 }
 
@@ -50,11 +53,17 @@ function event(eventId) {
 	 The class operator is used to compute history probability, which is then assigned as the leaf's value.
 */
 function computeProbabilities(histories) {
-	return mapValuesDeep(histories, (value, key, parent, context) => {
-		// Function identity() is present because mathjs.multiply() requires at least 2 arguments, and the path may only produce 1
-		const history = multiply(identity(2), ...context.path.map(eventId => event(eventId)));
-		return probability(history);
-	}, {leavesOnly: true, pathFormat: 'array'});
+	return eachDeep(histories, (value, key, parent, context) => {
+		let history = identity(2);
+		let path = [];
+		context.path.filter(element => (element !== 'children')).forEach(element => {
+			path = path.concat(['children', element]);
+			const {basis, event} = get(histories, path);
+			history = multiply(eventProjector(event, basis), history);
+		});
+		value.probability = probability(history);
+		return value;
+	}, {leavesOnly: true, childrenPath: 'children', pathFormat: 'array'});
 }
 
 export {computeProbabilities};

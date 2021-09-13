@@ -1,18 +1,45 @@
 import {computeProbabilities} from './physics.js';
 import * as d3 from 'd3';
 import isPlainObject from 'lodash/isPlainObject';
-import set from 'lodash/set';
+import findPathDeep from 'deepdash/findPathDeep';
 import {round} from 'mathjs';
 import katex from 'katex';
 
-let histories = {
-	'z,up': {
-		'x,up': {
+const histories = {
+	children: [
+		{
+			basis: 'z',
+			event: 'spinUp',
+			children: [
+				{
+					basis: 'x',
+					event: 'spinUp',
+					children: [],
+				},
+				{
+					basis: 'x',
+					event: 'spinDown',
+					children: [
+						{
+							basis: 'z',
+							event: 'spinUp',
+							children: [],
+						},
+						{
+							basis: 'z',
+							event: 'spinDown',
+							children: [],
+						},
+					],
+				},
+			],
 		},
-		'x,down': {},
-	},
-	'z,down': {
-	},
+		{
+			basis: 'z',
+			event: 'spinDown',
+			children: [],
+		},
+	],
 };
 
 const nodeLength = 120;
@@ -35,23 +62,21 @@ document.querySelector('#app').appendChild(svg.node());
 
 // Configures a d3 hierarchy for a given set of histories
 function getRoot(histories) {
-	const root = d3.hierarchy(computeProbabilities(histories), branch => Object.values(branch));
+	const root = d3.hierarchy(computeProbabilities(histories));
 	root.x0 = dy / 2;
 	root.y0 = 0;
 	root.descendants().forEach((d, i) => {
 		d.id = i;
 		// Label analyzers
-		if (isPlainObject(d.data)) {
-			const [basis, spin, theta, phi] = Object.keys(d.data)[0].split(',');
-			d.basis = basis;
-			d.spin = spin;
-			d.theta = (basis === 'n') ? round(theta, 2) : '';
-			d.phi = (basis === 'n') ? round(phi, 2) : '';
+		if (d.data.children) {
+			if (d.data.children[0]) {
+				d.basis = d.data.children[0].basis;
+			}
 		}
 
 		// Label probabilities at leaves
-		if (typeof d.data === 'number') {
-			d.probability = round(d.data, 2);
+		if (d.data.probability) {
+			d.probability = round(d.data.probability, 2);
 		}
 	});
 
@@ -100,7 +125,7 @@ function draw(source) {
 		);
 
 	// Draw analyzers
-	const analyzers = gNode.selectAll('g').data(nodes.filter(node => isPlainObject(node.data)), d => d.id);
+	const analyzers = gNode.selectAll('g').data(nodes.filter(node => (node.data.children[0] !== undefined)), d => d.id);
 	const analyzerEnter = analyzers
 		.enter()
 		.append('g')
@@ -141,17 +166,23 @@ function draw(source) {
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
 		.on('click', click => {
-			const path = [`${click.target.__data__.basis},up`];
-			let {parent} = click.target.__data__;
-			while (parent) {
-				path.unshift(`${parent.basis},${parent.spin}`);
-				parent = parent.parent;
-			}
-
-			histories = set(histories, path, {'z,up': {}, 'z,down': {}});
-			root = getRoot(histories);
-			console.log(root);
-			draw(root);
+			console.log(click.target);
+			// const hierarchyPath = findPathDeep(root, (value, key) =>
+			// 	(key === 'id' & value === click.target.__data__.id), {checkCircular: true, pathFormat: 'array'})
+			// 	.filter(value => (value !== 'id' & value !== 'children'));
+			// console.log(hierarchyPath);
+			// console.log(root);
+			// // // Testing update behavior
+			// histories = {
+			// 	'z,up': {
+			// 		'z,up': {},
+			// 		'z,down': {},
+			// 	},
+			// 	'z,down': {
+			// 	},
+			// };
+			// root = getRoot(histories);
+			// draw(root);
 		});
 
 	// Draw spin-down port
@@ -213,7 +244,7 @@ function draw(source) {
 		.attr('stroke-opacity', 1);
 
 	// Draw counters
-	const counters = gNode.selectAll('g').data(nodes.filter(node => !isPlainObject(node.data)), d => d.id);
+	const counters = gNode.selectAll('g').data(nodes.filter(node => (node.data.probability !== undefined)), d => d.id);
 	const counterEnter = counters
 		.enter()
 		.append('g')
@@ -259,5 +290,5 @@ function draw(source) {
 		});
 }
 
-let root = getRoot(histories);
+const root = getRoot(histories);
 draw(root);
