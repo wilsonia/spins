@@ -301,7 +301,7 @@ function draw(source) {
 		.attr('x', -0.25 * nodeLength)
 		.attr('y', -0.4 * nodeLength)
 		.attr('width', nodeLength / 4)
-		.attr('height', nodeLength / 2)
+		.attr('height', nodeLength / 3)
 		.attr('opacity', 0)
 		.style('pointer-events', 'visible')
 		.on('click', click => basisClick(click));
@@ -318,15 +318,24 @@ function draw(source) {
 
 	analyzerEnter
 		.append('rect')
-		.attr('x', -0.5 * nodeLength)
+		.attr('x', -1 * nodeLength / 2)
 		.attr('y', -0.05 * nodeLength)
-		.attr('width', nodeLength)
+		.attr('width', 3 * nodeLength / 4)
 		.attr('height', nodeLength / 4)
 		.attr('opacity', 0)
 		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
 		.on('click', click => {
 			svg.selectAll('.slider').remove();
 			svg.selectAll('.axis').remove();
+			svg.append('foreignObject')
+				.attr('class', 'axis')
+				.attr('x', `${(click.clientX / 2)}`)
+				.attr('y', `${(click.clientY / 2) - 45}`)
+				.attr('width', nodeLength / 4)
+				.attr('height', nodeLength / 4)
+				.style('ponter-events', 'none')
+				.append('xhtml:body')
+				.html(katex.renderToString('\\LARGE{\\theta}'));
 			svg.append('g')
 				.attr('pointer-events', 'all')
 				.attr('transform', `translate(${click.clientX / 2}, ${click.clientY / 2})`)
@@ -345,15 +354,24 @@ function draw(source) {
 
 	analyzerEnter
 		.append('rect')
-		.attr('x', -0.5 * nodeLength)
+		.attr('x', -1 * nodeLength / 2)
 		.attr('y', 0.15 * nodeLength)
-		.attr('width', nodeLength)
+		.attr('width', 3 * nodeLength / 4)
 		.attr('height', nodeLength / 4)
 		.attr('opacity', 0)
 		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
 		.on('click', click => {
 			svg.selectAll('.slider').remove();
 			svg.selectAll('.axis').remove();
+			svg.append('foreignObject')
+				.attr('class', 'axis')
+				.attr('x', `${(click.clientX / 2)}`)
+				.attr('y', `${(click.clientY / 2) - 45}`)
+				.attr('width', nodeLength / 4)
+				.attr('height', nodeLength / 4)
+				.style('ponter-events', 'none')
+				.append('xhtml:body')
+				.html(katex.renderToString('\\LARGE{\\phi}'));
 			svg.append('g')
 				.attr('transform', `translate(${click.clientX / 2}, ${click.clientY / 2})`)
 				.call(slider(click, 'phi'));
