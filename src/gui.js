@@ -85,6 +85,63 @@ function getRoot(histories) {
 	return root;
 }
 
+// Define click behavior
+function basisClick(click) {
+	let parent = click.target.__data__;
+	const path = [];
+	console.log(parent);
+	while (parent.parent) {
+		const childIndex = findIndex(parent.parent.data.children, child =>
+			(child.basis === parent.data.basis & child.event === parent.data.event));
+		path.unshift('children', childIndex);
+		parent = parent.parent;
+	}
+
+	path.push('children');
+
+	histories = set(histories, path, get(histories, path).map(child => {
+		child.basis = {
+			z: 'x',
+			x: 'y',
+			y: 'z',
+		}[child.basis];
+		return child;
+	}));
+
+	root = getRoot(histories);
+	draw(root);
+}
+
+function eventClick(click, event) {
+	let parent = click.target.__data__;
+	const path = ['children', findIndex(parent.children, child =>
+		(child.data.basis === parent.basis & child.data.event === event))];
+	while (parent.parent) {
+		const childIndex = findIndex(parent.parent.data.children, child =>
+			(child.basis === parent.data.basis & child.event === parent.data.event));
+		path.unshift('children', childIndex);
+		parent = parent.parent;
+	}
+
+	path.push('children');
+	histories = set(histories, path, ((get(histories, path).length === 0))
+		? [
+			{
+				basis: 'z',
+				event: 'spinUp',
+				children: [],
+			},
+			{
+				basis: 'z',
+				event: 'spinDown',
+				children: [],
+			},
+		]
+		: []);
+	root = getRoot(histories);
+	draw(root);
+}
+
 // Binds d3 hierarchy to svg nodes and links
 function draw(source) {
 	svg.selectAll('*').remove();
@@ -114,36 +171,6 @@ function draw(source) {
 			right = node;
 		}
 	});
-
-	function analyzerPortClick(click, event) {
-		let parent = click.target.__data__;
-		const path = ['children', findIndex(parent.children, child =>
-			(child.data.basis === parent.basis & child.data.event === event))];
-		while (parent.parent) {
-			const childIndex = findIndex(parent.parent.data.children, child =>
-				(child.basis === parent.data.basis & child.event === parent.data.event));
-			path.unshift('children', childIndex);
-			parent = parent.parent;
-		}
-
-		path.push('children');
-		histories = set(histories, path, ((get(histories, path).length === 0))
-			? [
-				{
-					basis: 'z',
-					event: 'spinUp',
-					children: [],
-				},
-				{
-					basis: 'z',
-					event: 'spinDown',
-					children: [],
-				},
-			]
-			: []);
-		root = getRoot(histories);
-		draw(root);
-	}
 
 	const height = right.x - left.x + margin.top + margin.bottom;
 	svg
@@ -196,7 +223,7 @@ function draw(source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => analyzerPortClick(click, 'spinUp'));
+		.on('click', click => eventClick(click, 'spinUp'));
 
 	// Draw spin-down port
 	analyzerEnter
@@ -219,7 +246,7 @@ function draw(source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => analyzerPortClick(click, 'spinDown'));
+		.on('click', click => eventClick(click, 'spinDown'));
 
 	// Label analyzers
 	analyzerEnter
@@ -231,6 +258,16 @@ function draw(source) {
 		.style('pointer-events', 'none')
 		.append('xhtml:body')
 		.html(d => katex.renderToString(`\\Huge{\\hat{${d.basis}}}`));
+
+	analyzerEnter
+		.append('rect')
+		.attr('x', -0.25 * nodeLength)
+		.attr('y', -0.4 * nodeLength)
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.attr('opacity', 0)
+		.style('pointer-events', 'visible')
+		.on('click', click => basisClick(click));
 
 	analyzerEnter
 		.append('foreignObject')
