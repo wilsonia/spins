@@ -1,9 +1,10 @@
 import {computeProbabilities} from './physics.js';
 import * as d3 from 'd3';
+import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
 import get from 'lodash/get';
 import findIndex from 'lodash/findIndex';
-import {round} from 'mathjs';
+import {round, pi} from 'mathjs';
 import katex from 'katex';
 
 let histories = {
@@ -76,10 +77,8 @@ function getRoot(histories) {
 		if (d.data.children) {
 			if (d.data.children[0]) {
 				d.basis = d.data.children[0].basis;
-				if (d.data.children[0].theta) {
-					d.theta = d.data.children[0].theta;
-					d.phi = d.data.children[0].phi;
-				}
+				d.theta = d.data.children[0].theta;
+				d.phi = d.data.children[0].phi;
 			}
 		}
 
@@ -113,11 +112,41 @@ function basisClick(click) {
 			y: 'n',
 			n: 'z',
 		}[child.basis];
+		if ((child.basis === 'n') & (child.theta === undefined)) {
+			child.theta = 0;
+			child.phi = 0;
+		}
+
 		return child;
 	}));
 
 	root = getRoot(histories);
 	draw(root);
+}
+
+function slider(click, angle) {
+	let parent = click.target.__data__;
+	const path = [];
+	while (parent.parent) {
+		const childIndex = findIndex(parent.parent.data.children, child =>
+			(child.basis === parent.data.basis & child.event === parent.data.event));
+		path.unshift('children', childIndex);
+		parent = parent.parent;
+	}
+
+	path.push('children');
+
+	const angleInit = get(histories, path)[0][angle];
+	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(300).default(angleInit)
+		.on('end', value => {
+			histories = set(histories, path, get(histories, path).map(child => {
+				child[angle] = round(value, 2);
+				return child;
+			}));
+
+			root = getRoot(histories);
+			draw(root);
+		});
 }
 
 function eventClick(click, event) {
@@ -285,7 +314,24 @@ function draw(source) {
 		.attr('height', nodeLength / 4)
 		.style('pointer-events', 'none')
 		.append('xhtml:body')
-		.html(d => katex.renderToString(d.theta ? `\\Large{\\theta = ${d.theta}}` : ''));
+		.html(d => katex.renderToString((d.basis === 'n') ? `\\Large{\\theta = ${d.theta}}` : ''));
+
+	analyzerEnter
+		.append('rect')
+		.attr('x', -0.5 * nodeLength)
+		.attr('y', -0.05 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 4)
+		.attr('opacity', 0)
+		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
+		.on('click', click => {
+			svg.selectAll('.slider').remove();
+			svg.selectAll('.axis').remove();
+			svg.append('g')
+				.attr('pointer-events', 'all')
+				.attr('transform', `translate(${click.clientX / 2}, ${click.clientY / 2})`)
+				.call(slider(click, 'theta'));
+		});
 
 	analyzerEnter
 		.append('foreignObject')
@@ -295,7 +341,23 @@ function draw(source) {
 		.attr('height', nodeLength / 4)
 		.style('pointer-events', 'none')
 		.append('xhtml:body')
-		.html(d => katex.renderToString(d.phi ? `\\Large{\\phi = ${d.phi}}` : ''));
+		.html(d => katex.renderToString(d.basis === 'n' ? `\\Large{\\phi = ${d.phi}}` : ''));
+
+	analyzerEnter
+		.append('rect')
+		.attr('x', -0.5 * nodeLength)
+		.attr('y', 0.15 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 4)
+		.attr('opacity', 0)
+		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
+		.on('click', click => {
+			svg.selectAll('.slider').remove();
+			svg.selectAll('.axis').remove();
+			svg.append('g')
+				.attr('transform', `translate(${click.clientX / 2}, ${click.clientY / 2})`)
+				.call(slider(click, 'phi'));
+		});
 
 	analyzers
 		.merge(analyzerEnter)
