@@ -1,11 +1,11 @@
 import {computeProbabilities} from './physics.js';
 import * as d3 from 'd3';
-import isPlainObject from 'lodash/isPlainObject';
-import findPathDeep from 'deepdash/findPathDeep';
+import set from 'lodash/set';
+import findIndex from 'lodash/findIndex';
 import {round} from 'mathjs';
 import katex from 'katex';
 
-const histories = {
+let histories = {
 	children: [
 		{
 			basis: 'z',
@@ -75,8 +75,8 @@ function getRoot(histories) {
 		}
 
 		// Label probabilities at leaves
-		if (d.data.probability) {
-			d.probability = round(d.data.probability, 2);
+		if (d.data.probability !== undefined) {
+			d.probability = round((d.data.probability), 2);
 		}
 	});
 
@@ -166,23 +166,32 @@ function draw(source) {
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
 		.on('click', click => {
-			console.log(click.target);
-			// const hierarchyPath = findPathDeep(root, (value, key) =>
-			// 	(key === 'id' & value === click.target.__data__.id), {checkCircular: true, pathFormat: 'array'})
-			// 	.filter(value => (value !== 'id' & value !== 'children'));
-			// console.log(hierarchyPath);
-			// console.log(root);
-			// // // Testing update behavior
-			// histories = {
-			// 	'z,up': {
-			// 		'z,up': {},
-			// 		'z,down': {},
-			// 	},
-			// 	'z,down': {
-			// 	},
-			// };
-			// root = getRoot(histories);
-			// draw(root);
+			let parent = click.target.__data__;
+			const path = ['children', findIndex(parent.children, child =>
+				(child.data.basis === parent.basis & child.data.event === 'spinUp'))];
+			while (parent.parent) {
+				const childIndex = findIndex(parent.parent.data.children, child =>
+					(child.basis === parent.data.basis & child.event === parent.data.event));
+				path.unshift('children', childIndex);
+				parent = parent.parent;
+			}
+
+			path.push('children');
+			histories = set(histories, path, [
+				{
+					basis: 'z',
+					event: 'spinUp',
+					children: [],
+				},
+				{
+					basis: 'z',
+					event: 'spinDown',
+					children: [],
+				},
+			]);
+			console.log(computeProbabilities(histories));
+			root = getRoot(histories);
+			draw(root);
 		});
 
 	// Draw spin-down port
@@ -290,5 +299,5 @@ function draw(source) {
 		});
 }
 
-const root = getRoot(histories);
+let root = getRoot(histories);
 draw(root);
