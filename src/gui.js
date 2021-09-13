@@ -45,9 +45,9 @@ let histories = {
 
 const nodeLength = 120;
 const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength, left: nodeLength};
-const width = d3.width || 960;
+const width = d3.width || 1200;
 const dx = 65;
-const dy = width / 6;
+const dy = width / 8;
 const diagonal = d3
 	.linkHorizontal()
 	.x(d => d.y - (dy / 4))
@@ -89,7 +89,6 @@ function getRoot(histories) {
 function basisClick(click) {
 	let parent = click.target.__data__;
 	const path = [];
-	console.log(parent);
 	while (parent.parent) {
 		const childIndex = findIndex(parent.parent.data.children, child =>
 			(child.basis === parent.data.basis & child.event === parent.data.event));
@@ -124,7 +123,7 @@ function eventClick(click, event) {
 	}
 
 	path.push('children');
-	histories = set(histories, path, ((get(histories, path).length === 0))
+	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
 		? [
 			{
 				basis: 'z',
