@@ -20,7 +20,7 @@ It accomplishes several goals:
 - Updates tech stack
 
 ## Stack
-The simulation is written in [node.js](https://nodejs.org/en/), with [webpack](https://webpack.js.org/) bundling the program for browser execution.
+The simulation is written in Javascript, adhering to the ES6 specification. The project uses [node.js](https://nodejs.org/en/) for development and dependency management and [webpack](https://webpack.js.org/) for bundling the program for browser execution.
 Several packages were used to reduce code volume and simplify control flow:
 - [mathjs](https://mathjs.org/) for linear algebra computations
 - [d3-hierarchy](https://github.com/d3/d3-hierarchy) for tree visualization
@@ -28,7 +28,20 @@ Several packages were used to reduce code volume and simplify control flow:
 - [katex](https://katex.org/) for math symbol rendering
 
 ### Installing
-`npm install`
+1. Install [nodejs](https://nodejs.org/en/download/)
+2. Clone the project
+```shell
+git clone git@github.com:wilsonia/spins.git
+```
+3. Navigate to the project and install dependencies
+```shell
+cd ./spins
+npm install
+```
 
-### Building
-`npm run build`
+### Building and executing
+1. Bundle with webpack
+```shell
+npm run build
+````
+2. Open [index.html](index.html) in a browser. You may need to [allow CORS in Firefox](https://stackoverflow.com/a/48957475).
