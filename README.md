@@ -27,7 +27,7 @@ Several packages were used to reduce code volume and simplify control flow:
 - [lodash](https://lodash.com) and [deepdash](https://deepdash.io) for tree traversal
 - [katex](https://katex.org/) for math symbol rendering
 
-### Installing
+## Installing
 1. Install [nodejs](https://nodejs.org/en/download/)
 2. Clone the project
 ```shell
@@ -39,9 +39,15 @@ cd ./spins
 npm install
 ```
 
-### Building and executing
+## Building and executing
 1. Bundle with webpack
 ```shell
 npm run build
 ````
 2. Open [index.html](index.html) in a browser. You may need to [allow CORS in Firefox](https://stackoverflow.com/a/48957475).
+
+## TODO
+- Send individual electrons through to counters
+- Spin-1
+- Magnets
+- Reduce bundle size
