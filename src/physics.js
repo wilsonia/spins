@@ -1,25 +1,28 @@
-import {
-	complex,
-	matrix,
-	kron,
-	ctranspose,
-	multiply,
-	add,
-	trace,
-	identity,
-	re,
-	cos,
-	sin,
-	exp,
-	pi} from 'mathjs';
 import eachDeep from 'deepdash/eachDeep';
 import get from 'lodash/get';
 
-/*
-	Returns a spin-up or spin-down state in the basis defined by polar angle theta and azimuthal angle phi
-*/
-function spinState(up, theta, phi) {
-	return up ? matrix([[cos(theta / 2), multiply(sin(theta / 2), exp(complex(0, phi)))]])
+// Import math modules in a way that minimizes bundle size
+import {create, complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies} from '../mathjs/lib/browser/math.js';
+const {complex, matrix, kron, ctranspose, multiply, add, trace, identity, re, cos, sin, pow, exp, expm, pi} = create({complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies});
+
+const spinOrientations = {
+	z: {
+		theta: 0,
+		phi: 0,
+	},
+	x: {
+		theta: pi / 2,
+		phi: 0,
+	},
+	y: {
+		theta: pi / 2,
+		phi: pi / 2,
+	},
+};
+
+// Returns a spin-up or spin-down state in the basis defined by polar angle theta and azimuthal angle phi
+function spinState(spin, theta, phi) {
+	return spin ? matrix([[cos(theta / 2), multiply(sin(theta / 2), exp(complex(0, phi)))]])
 		: matrix([[sin(theta / 2), multiply(-cos(theta / 2), exp(complex(0, phi)))]]);
 }
 
@@ -39,23 +42,9 @@ function probability(history) {
 	return re(trace(multiply(ctranspose(history), densityOperator, history)));
 }
 
-/*
-	Maps a history schema eventId to an event operator
-	This contains definitions of the Sx, Sy, and Sz bases
-*/
-function eventProjector(event, basis, theta, phi) {
-	switch (basis) {
-		case 'z':
-			return projector(spinState((event === 'spinUp') ? 1 : 0, 0, 0));
-		case 'x':
-			return projector(spinState((event === 'spinUp') ? 1 : 0, pi / 2, 0));
-		case 'y':
-			return projector(spinState((event === 'spinUp') ? 1 : 0, pi / 2, pi / 2));
-
-		default:
-			return projector(spinState((event === 'spinUp') ? 1 : 0, Number(theta), Number(phi)));
-	// }
-	}
+function magnetPropagator() {
+	const omega = multiply(1.76, pow(10, 11));
+	return expm(matrix([[complex(0, -omega), 0], [0, complex(0, omega)]]));
 }
 
 /*
@@ -69,8 +58,10 @@ function computeProbabilities(histories) {
 		let path = [];
 		context.path.filter(element => (element !== 'children')).forEach(element => {
 			path = path.concat(['children', element]);
-			const {basis, event, theta, phi} = get(histories, path);
-			history = multiply(eventProjector(event, basis, theta, phi), history);
+			let {basis, event, theta, phi} = get(histories, path);
+			theta = theta ?? spinOrientations[basis].theta;
+			phi = phi ?? spinOrientations[basis].phi;
+			history = multiply(projector(spinState((event === 'spinUp') ? 1 : 0, theta, phi)), history);
 		});
 		value.probability = probability(history);
 		return value;

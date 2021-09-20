@@ -4,8 +4,11 @@ import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
 import get from 'lodash/get';
 import findIndex from 'lodash/findIndex';
-import {round, pi} from 'mathjs';
 import katex from 'katex';
+
+// Import math modules in a way that minimizes bundle size
+import {create, roundDependencies, piDependencies} from '../mathjs/lib/browser/math.js';
+const {round, pi} = create({roundDependencies, piDependencies});
 
 let histories = {
 	children: [
@@ -110,7 +113,6 @@ function basisClick(click) {
 }
 
 function slider(click, angle) {
-	console.log(click);
 	let parent = click.target.__data__;
 	const path = [];
 	while (parent.parent) {
@@ -178,7 +180,6 @@ function draw(source) {
 		.append('g')
 		.attr('cursor', 'pointer')
 		.attr('pointer-events', 'all');
-	const duration = d3.event && d3.event.altKey ? 2500 : 250;
 	const nodes = root.descendants().reverse();
 	const links = root.links();
 
@@ -198,7 +199,6 @@ function draw(source) {
 	const height = right.x - left.x + margin.top + margin.bottom;
 	svg
 		.transition()
-		.duration(duration)
 		.attr('viewBox', [-margin.left, left.x - margin.top, width, height])
 		.tween(
 			'resize',
