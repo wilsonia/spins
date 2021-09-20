@@ -28,7 +28,7 @@ Several packages were used to reduce code volume and simplify control flow:
 - [katex](https://katex.org/) for math symbol rendering
 
 ## Installing
-1. Install [nodejs](https://nodejs.org/en/download/)
+1. Install [nodejs](https://nodejs.org/en/download/) version >= v12.21.0
 2. Clone the project
 ```shell
 git clone git@github.com:wilsonia/spins.git

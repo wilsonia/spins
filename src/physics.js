@@ -1,4 +1,17 @@
-import {complex, matrix, kron, ctranspose, multiply, add, trace, identity, re, cos, sin, exp, pi} from 'mathjs';
+import {
+	complex,
+	matrix,
+	kron,
+	ctranspose,
+	multiply,
+	add,
+	trace,
+	identity,
+	re,
+	cos,
+	sin,
+	exp,
+	pi} from 'mathjs';
 import eachDeep from 'deepdash/eachDeep';
 import get from 'lodash/get';
 
