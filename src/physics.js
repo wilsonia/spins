@@ -42,7 +42,11 @@ function probability(history) {
 	return re(trace(multiply(ctranspose(history), densityOperator, history)));
 }
 
-function magnetPropagator() {
+/*
+	Returns a time evolution operator for a uniform magnetic field,
+ 	oriented in direction defined by polar angle theta and azimuthal angle phi.
+*/
+function magnetPropagator(theta, phi) {
 	const omega = multiply(1.76, pow(10, 11));
 	return expm(matrix([[complex(0, -omega), 0], [0, complex(0, omega)]]));
 }
@@ -61,7 +65,10 @@ function computeProbabilities(histories) {
 			let {basis, event, theta, phi} = get(histories, path);
 			theta = theta ?? spinOrientations[basis].theta;
 			phi = phi ?? spinOrientations[basis].phi;
-			history = multiply(projector(spinState((event === 'spinUp') ? 1 : 0, theta, phi)), history);
+			history = multiply((event) === 'magnet'
+				? magnetPropagator(theta, phi)
+				: projector(spinState((event === 'spinUp') ? 1 : 0, theta, phi))
+			, history);
 		});
 		value.probability = probability(history);
 		return value;
