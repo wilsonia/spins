@@ -2,7 +2,7 @@ import eachDeep from 'deepdash/eachDeep';
 import get from 'lodash/get';
 
 // Import math modules in a way that minimizes bundle size
-import {create, complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies} from '../mathjs/lib/browser/math.js';
+import {create, complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies} from '../mathjs/lib/esm/index.js';
 const {complex, matrix, kron, ctranspose, multiply, add, trace, identity, re, cos, sin, pow, exp, expm, pi} = create({complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies});
 
 const spinOrientations = {

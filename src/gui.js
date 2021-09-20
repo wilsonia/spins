@@ -7,7 +7,7 @@ import findIndex from 'lodash/findIndex';
 import katex from 'katex';
 
 // Import math modules in a way that minimizes bundle size
-import {create, roundDependencies, piDependencies} from '../mathjs/lib/browser/math.js';
+import {create, roundDependencies, piDependencies} from '../mathjs/lib/esm/index.js';
 const {round, pi} = create({roundDependencies, piDependencies});
 
 let histories = {
@@ -18,12 +18,12 @@ let histories = {
 			children: [
 				{
 					basis: 'x',
-					event: 'magnet',
+					event: 'spinUp',
 					children: [],
 				},
 				{
 					basis: 'x',
-					event: 'magnet',
+					event: 'spinDown',
 					children: [],
 				},
 			],
@@ -38,7 +38,7 @@ let histories = {
 
 const nodeLength = 120;
 const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength * 1.5, left: nodeLength};
-const width = d3.width || 1200;
+const width = 1200;
 const dx = 65;
 const dy = width / 8;
 const diagonal = d3
