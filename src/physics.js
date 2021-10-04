@@ -47,9 +47,19 @@ function probability(history) {
  	oriented in direction defined by polar angle theta and azimuthal angle phi.
 */
 function magnetPropagator(theta, phi) {
-	const omega = multiply(1.76, pow(10, 11));
-	return expm(matrix([[complex(0, -omega * cos(theta)), complex(0, -omega * sin(theta) * exp(complex(0, -phi)))],
-		[complex(0, -omega * sin(theta) * exp(complex(0, phi))), complex(0, omega * cos(theta))]]));
+	const omega = multiply(1.76, pow(10, 5));
+	return expm(matrix(
+		[
+			[
+				complex(0, -omega * cos(theta)),
+				multiply(complex(0, -omega * sin(theta)), exp(complex(0, -phi))),
+			],
+			[
+				multiply(complex(0, -omega * sin(theta)), exp(complex(0, phi))),
+				complex(0, omega * cos(theta)),
+			],
+		],
+	));
 }
 
 /*

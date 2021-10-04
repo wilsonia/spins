@@ -17,7 +17,9 @@ let histories = {
 			event: 'spinUp',
 			children: [
 				{
-					basis: 'x',
+					basis: 'n',
+					theta: 0,
+					phi: 0,
 					event: 'magnet',
 					children: [
 						{
@@ -108,6 +110,8 @@ function basisClick(click) {
 			y: 'n',
 			n: 'z',
 		}[child.basis];
+		child.theta = undefined;
+		child.phi = undefined;
 		if ((child.basis === 'n') & (child.theta === undefined)) {
 			child.theta = 0;
 			child.phi = 0;
@@ -161,14 +165,19 @@ function eventClick(click, event) {
 		? [
 			{
 				basis: 'z',
-				event: 'spinUp',
+				event: 'magnet',
 				children: [],
 			},
-			{
-				basis: 'z',
-				event: 'spinDown',
-				children: [],
-			},
+			// {
+			// 	basis: 'z',
+			// 	event: 'spinUp',
+			// 	children: [],
+			// },
+			// {
+			// 	basis: 'z',
+			// 	event: 'spinDown',
+			// 	children: [],
+			// },
 		]
 		: []);
 	root = getRoot(histories);
@@ -213,8 +222,9 @@ function draw(source) {
 			window.ResizeObserver ? null : () => () => svg.dispatch('toggle'),
 		);
 
-	// Draw analyzers
-	const analyzers = gNode.selectAll('g').data(nodes.filter(node => (node.data.children[0] !== undefined)), d => d.id);
+	const analyzers = gNode.selectAll('g').data(nodes.filter(
+		node => (node.data.children[0] !== undefined)).filter(
+		node => node.data.children[0].event !== 'magnet'), d => d.id);
 	const analyzerEnter = analyzers
 		.enter()
 		.append('g')
@@ -373,6 +383,126 @@ function draw(source) {
 
 	analyzers
 		.merge(analyzerEnter)
+		.attr('transform', d => `translate(${d.y},${d.x})`)
+		.attr('fill-opacity', 1)
+		.attr('stroke-opacity', 1);
+
+	// Draw magnets
+	const magnets = gNode.selectAll('g').data(nodes.filter(
+		node => (node.data.children[0] !== undefined)).filter(
+		node => (node.data.children[0].event === 'magnet')), d => d.id);
+	const magnetEnter = magnets
+		.enter()
+		.append('g')
+		.attr('transform', `translate(${source.y0},${source.x0})`)
+		.attr('fill-opacity', 0)
+		.attr('stroke-opacity', 0);
+
+	// Draw outline
+	magnetEnter
+		.append('rect')
+		.attr('width', nodeLength)
+		.attr('x', -1 * (nodeLength / 2))
+		.attr('y', -1 * (nodeLength / 2))
+		.attr('height', nodeLength)
+		.attr('fill', 'white')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
+
+	// Label magnets
+	magnetEnter
+		.append('foreignObject')
+		.attr('x', -0.25 * nodeLength)
+		.attr('y', -0.4 * nodeLength)
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(d => katex.renderToString(`\\Huge{\\hat{${d.basis}}}`));
+
+	magnetEnter
+		.append('rect')
+		.attr('x', -0.25 * nodeLength)
+		.attr('y', -0.4 * nodeLength)
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 3)
+		.attr('opacity', 0)
+		.style('pointer-events', 'visible')
+		.on('click', click => basisClick(click));
+
+	magnetEnter
+		.append('foreignObject')
+		.attr('x', -0.5 * nodeLength)
+		.attr('y', -0.05 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 4)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(d => katex.renderToString((d.basis === 'n') ? `\\Large{\\theta = ${d.theta}}` : ''));
+
+	magnetEnter
+		.append('rect')
+		.attr('x', -1 * nodeLength / 2)
+		.attr('y', -0.05 * nodeLength)
+		.attr('width', 3 * nodeLength / 4)
+		.attr('height', nodeLength / 4)
+		.attr('opacity', 0)
+		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
+		.on('click', click => {
+			svg.selectAll('.slider').remove();
+			svg.selectAll('.axis').remove();
+			svg.append('foreignObject')
+				.attr('class', 'axis')
+				.attr('x', `${click.target.__data__.y + (1.25 * dx)}`)
+				.attr('y', `${click.target.__data__.x + (0.75 * dx)}`)
+				.attr('width', nodeLength / 4)
+				.attr('height', nodeLength / 4)
+				.style('ponter-events', 'none')
+				.append('xhtml:body')
+				.html(katex.renderToString('\\LARGE{\\theta}'));
+			svg.append('g')
+				.attr('pointer-events', 'all')
+				.attr('transform', `translate(${click.target.__data__.y + dx}, ${click.target.__data__.x + (1.4 * dx)})`)
+				.call(slider(click, 'theta'));
+		});
+
+	magnetEnter
+		.append('foreignObject')
+		.attr('x', -0.5 * nodeLength)
+		.attr('y', 0.15 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 4)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(d => katex.renderToString(d.basis === 'n' ? `\\Large{\\phi = ${d.phi}}` : ''));
+
+	magnetEnter
+		.append('rect')
+		.attr('x', -1 * nodeLength / 2)
+		.attr('y', 0.18 * nodeLength)
+		.attr('width', 3 * nodeLength / 4)
+		.attr('height', nodeLength / 4)
+		.attr('opacity', 0)
+		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
+		.on('click', click => {
+			svg.selectAll('.slider').remove();
+			svg.selectAll('.axis').remove();
+			svg.append('foreignObject')
+				.attr('class', 'axis')
+				.attr('x', `${click.target.__data__.y + (1.25 * dx)}`)
+				.attr('y', `${click.target.__data__.x + (0.75 * dx)}`)
+				.attr('width', nodeLength / 4)
+				.attr('height', nodeLength / 4)
+				.style('ponter-events', 'none')
+				.append('xhtml:body')
+				.html(katex.renderToString('\\LARGE{\\phi}'));
+			svg.append('g')
+				.attr('transform', `translate(${click.target.__data__.y + dx}, ${click.target.__data__.x + (1.4 * dx)})`)
+				.call(slider(click, 'phi'));
+		});
+
+	magnets
+		.merge(magnetEnter)
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
