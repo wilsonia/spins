@@ -48,7 +48,8 @@ function probability(history) {
 */
 function magnetPropagator(theta, phi) {
 	const omega = multiply(1.76, pow(10, 11));
-	return expm(matrix([[complex(0, -omega), 0], [0, complex(0, omega)]]));
+	return expm(matrix([[complex(0, -omega * cos(theta)), complex(0, -omega * sin(theta) * exp(complex(0, -phi)))],
+		[complex(0, -omega * sin(theta) * exp(complex(0, phi))), complex(0, omega * cos(theta))]]));
 }
 
 /*
