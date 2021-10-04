@@ -10,6 +10,7 @@ import katex from 'katex';
 import {create, roundDependencies, piDependencies} from '../mathjs/lib/esm/index.js';
 const {round, pi} = create({roundDependencies, piDependencies});
 
+// Default experimental setup
 let histories = {
 	children: [
 		{
@@ -90,99 +91,9 @@ function getRoot(histories) {
 	return root;
 }
 
-// Define click behavior
-function basisClick(click) {
-	let parent = click.target.__data__;
-	const path = [];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
-
-	path.push('children');
-
-	histories = set(histories, path, get(histories, path).map(child => {
-		child.basis = {
-			z: 'x',
-			x: 'y',
-			y: 'n',
-			n: 'z',
-		}[child.basis];
-		child.theta = undefined;
-		child.phi = undefined;
-		if ((child.basis === 'n') & (child.theta === undefined)) {
-			child.theta = 0;
-			child.phi = 0;
-		}
-
-		return child;
-	}));
-
-	root = getRoot(histories);
-	draw(root);
-}
-
-function slider(click, angle) {
-	let parent = click.target.__data__;
-	const path = [];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
-
-	path.push('children');
-
-	const angleInit = get(histories, path)[0][angle];
-	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(dy * 1.75).default(angleInit)
-		.on('end', value => {
-			histories = set(histories, path, get(histories, path).map(child => {
-				child[angle] = round(value, 2);
-				return child;
-			}));
-
-			root = getRoot(histories);
-			draw(root);
-		});
-}
-
-function eventClick(click, event) {
-	let parent = click.target.__data__;
-	const path = ['children', findIndex(parent.children, child =>
-		(child.data.basis === parent.basis & child.data.event === event))];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
-
-	path.push('children');
-	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
-		? [
-			{
-				basis: 'z',
-				event: 'magnet',
-				children: [],
-			},
-			// {
-			// 	basis: 'z',
-			// 	event: 'spinUp',
-			// 	children: [],
-			// },
-			// {
-			// 	basis: 'z',
-			// 	event: 'spinDown',
-			// 	children: [],
-			// },
-		]
-		: []);
-	root = getRoot(histories);
-	draw(root);
-}
+// Draw tree
+let root = getRoot(histories);
+draw(root);
 
 // Binds d3 hierarchy to svg nodes and links
 function draw(source) {
@@ -225,13 +136,47 @@ function draw(source) {
 	const analyzers = gNode.selectAll('g').data(nodes.filter(
 		node => (node.data.children[0] !== undefined)).filter(
 		node => node.data.children[0].event !== 'magnet'), d => d.id);
+	drawAnalyzers(analyzers, source);
+
+	// Draw magnets
+	const magnets = gNode.selectAll('g').data(nodes.filter(
+		node => (node.data.children[0] !== undefined)).filter(
+		node => (node.data.children[0].event === 'magnet')), d => d.id);
+	drawMagnets(magnets, source);
+
+	// Draw counters
+	const counters = gNode.selectAll('g').data(nodes.filter(node => (node.data.probability !== undefined)), d => d.id);
+	drawCounters(counters, source);
+
+	// Update the links…
+	const link = gLink.selectAll('path').data(links, d => d.target.id);
+
+	// Enter any new links at the parent's previous position.
+	const linkEnter = link
+		.enter()
+		.append('path')
+		.attr('d', () => {
+			const o = {x: source.x0, y: source.y0};
+			return diagonal({source: o, target: o});
+		});
+
+	link.merge(linkEnter).attr('d', diagonal);
+	link
+		.exit()
+		.remove()
+		.attr('d', () => {
+			const o = {x: source.x, y: source.y};
+			return diagonal({source: o, target: o});
+		});
+}
+
+function drawAnalyzers(analyzers, source) {
 	const analyzerEnter = analyzers
 		.enter()
 		.append('g')
 		.attr('transform', `translate(${source.y0},${source.x0})`)
 		.attr('fill-opacity', 0)
 		.attr('stroke-opacity', 0);
-
 	// Draw outline
 	analyzerEnter
 		.append('rect')
@@ -386,11 +331,9 @@ function draw(source) {
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
+}
 
-	// Draw magnets
-	const magnets = gNode.selectAll('g').data(nodes.filter(
-		node => (node.data.children[0] !== undefined)).filter(
-		node => (node.data.children[0].event === 'magnet')), d => d.id);
+function drawMagnets(magnets, source) {
 	const magnetEnter = magnets
 		.enter()
 		.append('g')
@@ -506,9 +449,9 @@ function draw(source) {
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
+}
 
-	// Draw counters
-	const counters = gNode.selectAll('g').data(nodes.filter(node => (node.data.probability !== undefined)), d => d.id);
+function drawCounters(counters, source) {
 	const counterEnter = counters
 		.enter()
 		.append('g')
@@ -531,31 +474,101 @@ function draw(source) {
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
+}
 
-	// Update the links…
-	const link = gLink.selectAll('path').data(links, d => d.target.id);
+// Define click behavior
+function basisClick(click) {
+	let parent = click.target.__data__;
+	const path = [];
+	while (parent.parent) {
+		const childIndex = findIndex(parent.parent.data.children, child =>
+			(child.basis === parent.data.basis & child.event === parent.data.event));
+		path.unshift('children', childIndex);
+		parent = parent.parent;
+	}
 
-	// Enter any new links at the parent's previous position.
-	const linkEnter = link
-		.enter()
-		.append('path')
-		.attr('d', () => {
-			const o = {x: source.x0, y: source.y0};
-			return diagonal({source: o, target: o});
-		});
+	path.push('children');
 
-	link.merge(linkEnter).attr('d', diagonal);
-	link
-		.exit()
-		.remove()
-		.attr('d', () => {
-			const o = {x: source.x, y: source.y};
-			return diagonal({source: o, target: o});
+	histories = set(histories, path, get(histories, path).map(child => {
+		child.basis = {
+			z: 'x',
+			x: 'y',
+			y: 'n',
+			n: 'z',
+		}[child.basis];
+		child.theta = undefined;
+		child.phi = undefined;
+		if ((child.basis === 'n') & (child.theta === undefined)) {
+			child.theta = 0;
+			child.phi = 0;
+		}
+
+		return child;
+	}));
+
+	root = getRoot(histories);
+	draw(root);
+}
+
+function slider(click, angle) {
+	let parent = click.target.__data__;
+	const path = [];
+	while (parent.parent) {
+		const childIndex = findIndex(parent.parent.data.children, child =>
+			(child.basis === parent.data.basis & child.event === parent.data.event));
+		path.unshift('children', childIndex);
+		parent = parent.parent;
+	}
+
+	path.push('children');
+
+	const angleInit = get(histories, path)[0][angle];
+	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(dy * 1.75).default(angleInit)
+		.on('end', value => {
+			histories = set(histories, path, get(histories, path).map(child => {
+				child[angle] = round(value, 2);
+				return child;
+			}));
+
+			root = getRoot(histories);
+			draw(root);
 		});
 }
 
-let root = getRoot(histories);
-draw(root);
+function eventClick(click, event) {
+	let parent = click.target.__data__;
+	const path = ['children', findIndex(parent.children, child =>
+		(child.data.basis === parent.basis & child.data.event === event))];
+	while (parent.parent) {
+		const childIndex = findIndex(parent.parent.data.children, child =>
+			(child.basis === parent.data.basis & child.event === parent.data.event));
+		path.unshift('children', childIndex);
+		parent = parent.parent;
+	}
+
+	path.push('children');
+	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
+		? [
+			{
+				basis: 'z',
+				event: 'magnet',
+				children: [],
+			},
+			// {
+			// 	basis: 'z',
+			// 	event: 'spinUp',
+			// 	children: [],
+			// },
+			// {
+			// 	basis: 'z',
+			// 	event: 'spinDown',
+			// 	children: [],
+			// },
+		]
+		: []);
+	root = getRoot(histories);
+	draw(root);
+}
 
 // Config file reader
 document.getElementById('import').onclick = function () {

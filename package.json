@@ -19,6 +19,6 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
-		"bundleStats": "webpack --json > ./meta/stats.json"
+    "bundleStats": "webpack --json > ./meta/stats.json"
   }
 }
