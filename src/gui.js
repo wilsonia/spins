@@ -5,6 +5,7 @@ import set from 'lodash/set';
 import get from 'lodash/get';
 import findIndex from 'lodash/findIndex';
 import katex from 'katex';
+import omitDeep from 'deepdash/omitDeep';
 
 // Import math modules in a way that minimizes bundle size
 import {create, roundDependencies, piDependencies} from '../mathjs/lib/esm/index.js';
@@ -18,10 +19,8 @@ let histories = {
 			event: 'spinUp',
 			children: [
 				{
-					basis: 'n',
-					theta: 0,
-					phi: 0,
-					event: 'magnet',
+					basis: 'x',
+					event: 'spinUp',
 					children: [
 						{
 							basis: 'z',
@@ -36,6 +35,11 @@ let histories = {
 							],
 						},
 					],
+				},
+				{
+					basis: 'x',
+					event: ' spinDown',
+					children: [],
 				},
 			],
 		},
@@ -209,7 +213,8 @@ function drawAnalyzers(analyzers, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => eventClick(click, 'spinUp'));
+		.on('click', click => eventLeftClick(click, 'spinUp'))
+		.on('contextmenu', click => eventRightClick(click, 'spinUp'));
 
 	// Draw spin-down port
 	analyzerEnter
@@ -232,7 +237,8 @@ function drawAnalyzers(analyzers, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => eventClick(click, 'spinDown'));
+		.on('click', click => eventLeftClick(click, 'spinDown'))
+		.on('contextmenu', click => eventRightClick(click, 'spinDown'));
 
 	// Label analyzers
 	analyzerEnter
@@ -348,9 +354,23 @@ function drawMagnets(magnets, source) {
 		.attr('x', -1 * (nodeLength / 2))
 		.attr('y', -1 * (nodeLength / 2))
 		.attr('height', nodeLength)
-		.attr('fill', 'white')
+		.attr('fill', 'gainsboro')
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey');
+
+	// Draw output port
+	magnetEnter
+		.append('rect')
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength)
+		.attr('x', nodeLength / 4)
+		.attr('y', -nodeLength / 2)
+		.attr('fill', 'transparent')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey')
+		.style('pointer-events', 'visible')
+		.on('click', click => magnetLeftClick(click))
+		.on('contextmenu', click => magnetRightClick(click));
 
 	// Label magnets
 	magnetEnter
@@ -535,7 +555,38 @@ function slider(click, angle) {
 		});
 }
 
-function eventClick(click, event) {
+function eventLeftClick(click, event) {
+	let parent = click.target.__data__;
+	const path = ['children', findIndex(parent.children, child =>
+		(child.data.basis === parent.basis & child.data.event === event))];
+	while (parent.parent) {
+		const childIndex = findIndex(parent.parent.data.children, child =>
+			(child.basis === parent.data.basis & child.event === parent.data.event));
+		path.unshift('children', childIndex);
+		parent = parent.parent;
+	}
+
+	path.push('children');
+	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
+		? [
+			{
+				basis: 'z',
+				event: 'spinUp',
+				children: [],
+			},
+			{
+				basis: 'z',
+				event: 'spinDown',
+				children: [],
+			},
+		]
+		: []);
+	root = getRoot(histories);
+	draw(root);
+}
+
+function eventRightClick(click, event) {
+	click.preventDefault();
 	let parent = click.target.__data__;
 	const path = ['children', findIndex(parent.children, child =>
 		(child.data.basis === parent.basis & child.data.event === event))];
@@ -554,16 +605,62 @@ function eventClick(click, event) {
 				event: 'magnet',
 				children: [],
 			},
-			// {
-			// 	basis: 'z',
-			// 	event: 'spinUp',
-			// 	children: [],
-			// },
-			// {
-			// 	basis: 'z',
-			// 	event: 'spinDown',
-			// 	children: [],
-			// },
+		]
+		: []);
+	root = getRoot(histories);
+	draw(root);
+}
+
+function magnetLeftClick(click) {
+	let parent = click.target.__data__;
+	const path = ['children', findIndex(parent.children, child =>
+		(child.data.basis === parent.basis))];
+	while (parent.parent) {
+		const childIndex = findIndex(parent.parent.data.children, child =>
+			(child.basis === parent.data.basis & child.event === parent.data.event));
+		path.unshift('children', childIndex);
+		parent = parent.parent;
+	}
+
+	path.push('children');
+	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
+		? [
+			{
+				basis: 'z',
+				event: 'spinUp',
+				children: [],
+			},
+			{
+				basis: 'z',
+				event: 'spinDown',
+				children: [],
+			},
+		]
+		: []);
+	root = getRoot(histories);
+	draw(root);
+}
+
+function magnetRightClick(click) {
+	click.preventDefault();
+	let parent = click.target.__data__;
+	const path = ['children', findIndex(parent.children, child =>
+		(child.data.basis === parent.basis))];
+	while (parent.parent) {
+		const childIndex = findIndex(parent.parent.data.children, child =>
+			(child.basis === parent.data.basis & child.event === parent.data.event));
+		path.unshift('children', childIndex);
+		parent = parent.parent;
+	}
+
+	path.push('children');
+	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
+		? [
+			{
+				basis: 'z',
+				event: 'magnet',
+				children: [],
+			},
 		]
 		: []);
 	root = getRoot(histories);
@@ -590,7 +687,7 @@ document.getElementById('import').onclick = function () {
 // Config file saver
 document.getElementById('export').onclick = function () {
 	const a = document.createElement('a');
-	const file = new Blob([JSON.stringify(histories, null, 2)], {type: 'application/json'});
+	const file = new Blob([JSON.stringify(omitDeep(histories, 'probability'), null, 2)], {type: 'application/json'});
 	a.href = URL.createObjectURL(file);
 	a.download = 'histories.json';
 	a.click();

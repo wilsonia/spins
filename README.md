@@ -47,9 +47,8 @@ npm run build
 2. Open [index.html](index.html) in a browser. You may need to [allow CORS in Firefox](https://stackoverflow.com/a/48957475).
 
 ## mathjs
-TODO note about expm
+mathjs is cloned locally rather than installed via npm. This is so the `maxSearchSize` parameter may be increased for the matrix exponential approximation function `expm`. Unfortunately this parameter is not configurable, and increasing it is necessary for computing the magnet propagator.
 
 ## TODO
 - Send individual electrons through to counters
 - Spin-1
-- Magnets
