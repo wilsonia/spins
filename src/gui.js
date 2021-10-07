@@ -38,7 +38,7 @@ let histories = {
 				},
 				{
 					basis: 'x',
-					event: ' spinDown',
+					event: 'spinDown',
 					children: [],
 				},
 			],
@@ -567,6 +567,7 @@ function eventLeftClick(click, event) {
 	}
 
 	path.push('children');
+	console.log(path);
 	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
 		? [
 			{
