@@ -51,4 +51,6 @@ mathjs is cloned locally rather than installed via npm. This is so the `maxSearc
 
 ## TODO
 - Send individual electrons through to counters
+- Code chunking
+- Clean up GUI code
 - Spin-1
