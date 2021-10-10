@@ -24,8 +24,13 @@ let histories = {
 					children: [
 						{
 							basis: 'z',
-							event: 'magnet',
-							magnitude: 1,
+							event: 'spinUp',
+							children: [
+							],
+						},
+						{
+							basis: 'z',
+							event: 'spinDown',
 							children: [
 							],
 						},
