@@ -3,7 +3,7 @@ import get from 'lodash/get';
 
 // Import math modules in a way that minimizes bundle size
 import {create, complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies} from '../mathjs/lib/esm/index.js';
-const {complex, matrix, kron, ctranspose, multiply, add, trace, identity, re, cos, sin, pow, exp, expm, pi} = create({complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies});
+const {complex, matrix, kron, ctranspose, multiply, add, trace, identity, re, cos, sin, exp, expm, pi} = create({complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies});
 
 const spinOrientations = {
 	z: {
@@ -46,17 +46,16 @@ function probability(history) {
 	Returns a time evolution operator for a uniform magnetic field,
  	oriented in direction defined by polar angle theta and azimuthal angle phi.
 */
-function magnetPropagator(theta, phi) {
-	const omega = multiply(1.76, pow(10, 5));
+function magnetPropagator(theta, phi, magnitude) {
 	return expm(matrix(
 		[
 			[
-				complex(0, -omega * cos(theta)),
-				multiply(complex(0, -omega * sin(theta)), exp(complex(0, -phi))),
+				complex(0, -magnitude * cos(theta)),
+				multiply(complex(0, -magnitude * sin(theta)), exp(complex(0, -phi))),
 			],
 			[
-				multiply(complex(0, -omega * sin(theta)), exp(complex(0, phi))),
-				complex(0, omega * cos(theta)),
+				multiply(complex(0, -magnitude * sin(theta)), exp(complex(0, phi))),
+				complex(0, magnitude * cos(theta)),
 			],
 		],
 	));
@@ -73,11 +72,11 @@ function computeProbabilities(histories) {
 		let path = [];
 		context.path.filter(element => (element !== 'children')).forEach(element => {
 			path = path.concat(['children', element]);
-			let {basis, event, theta, phi} = get(histories, path);
+			let {basis, event, theta, phi, magnitude} = get(histories, path);
 			theta = theta ?? spinOrientations[basis].theta;
 			phi = phi ?? spinOrientations[basis].phi;
 			history = multiply((event) === 'magnet'
-				? magnetPropagator(theta, phi)
+				? magnetPropagator(theta, phi, magnitude)
 				: projector(spinState((event === 'spinUp') ? 1 : 0, theta, phi))
 			, history);
 		});

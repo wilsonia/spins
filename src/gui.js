@@ -24,13 +24,8 @@ let histories = {
 					children: [
 						{
 							basis: 'z',
-							event: 'spinUp',
-							children: [
-							],
-						},
-						{
-							basis: 'z',
-							event: 'spinDown',
+							event: 'magnet',
+							magnitude: 1,
 							children: [
 							],
 						},
@@ -82,6 +77,7 @@ function getRoot(histories) {
 				d.basis = d.data.children[0].basis;
 				d.theta = d.data.children[0].theta;
 				d.phi = d.data.children[0].phi;
+				d.magnitude = d.data.children[0].magnitude;
 			}
 		}
 
@@ -376,7 +372,7 @@ function drawMagnets(magnets, source) {
 	magnetEnter
 		.append('foreignObject')
 		.attr('x', -0.25 * nodeLength)
-		.attr('y', -0.4 * nodeLength)
+		.attr('y', -0.55 * nodeLength)
 		.attr('width', nodeLength / 4)
 		.attr('height', nodeLength / 2)
 		.style('pointer-events', 'none')
@@ -386,12 +382,47 @@ function drawMagnets(magnets, source) {
 	magnetEnter
 		.append('rect')
 		.attr('x', -0.25 * nodeLength)
-		.attr('y', -0.4 * nodeLength)
+		.attr('y', -0.55 * nodeLength)
 		.attr('width', nodeLength / 4)
 		.attr('height', nodeLength / 3)
 		.attr('opacity', 0)
 		.style('pointer-events', 'visible')
 		.on('click', click => basisClick(click));
+
+	magnetEnter
+		.append('foreignObject')
+		.attr('x', -0.5 * nodeLength)
+		.attr('y', -0.24 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 3)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(d => katex.renderToString(`\\Large{\\omega = ${d.magnitude}}`));
+
+	magnetEnter
+		.append('rect')
+		.attr('x', -1 * nodeLength / 2)
+		.attr('y', -0.24 * nodeLength)
+		.attr('width', 3 * nodeLength / 4)
+		.attr('height', nodeLength / 4)
+		.attr('opacity', 0)
+		.on('click', click => {
+			svg.selectAll('.slider').remove();
+			svg.selectAll('.axis').remove();
+			svg.append('foreignObject')
+				.attr('class', 'axis')
+				.attr('x', `${click.target.__data__.y + (1.25 * dx)}`)
+				.attr('y', `${click.target.__data__.x + (0.85 * dx)}`)
+				.attr('width', nodeLength)
+				.attr('height', nodeLength / 3)
+				.style('ponter-events', 'none')
+				.append('xhtml:body')
+				.html(katex.renderToString('\\LARGE{\\omega = \\frac{e}{m_e} |\\vec{B}|}'));
+			svg.append('g')
+				.attr('pointer-events', 'all')
+				.attr('transform', `translate(${click.target.__data__.y + dx}, ${click.target.__data__.x + (1.6 * dx)})`)
+				.call(slider(click, 'magnitude'));
+		});
 
 	magnetEnter
 		.append('foreignObject')
@@ -530,7 +561,7 @@ function basisClick(click) {
 	draw(root);
 }
 
-function slider(click, angle) {
+function slider(click, parameter) {
 	let parent = click.target.__data__;
 	const path = [];
 	while (parent.parent) {
@@ -542,11 +573,11 @@ function slider(click, angle) {
 
 	path.push('children');
 
-	const angleInit = get(histories, path)[0][angle];
-	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(dy * 1.75).default(angleInit)
+	const parameterInit = get(histories, path)[0][parameter];
+	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(dy * 1.75).default(parameterInit)
 		.on('end', value => {
 			histories = set(histories, path, get(histories, path).map(child => {
-				child[angle] = round(value, 2);
+				child[parameter] = round(value, 2);
 				return child;
 			}));
 
@@ -604,6 +635,7 @@ function eventRightClick(click, event) {
 			{
 				basis: 'z',
 				event: 'magnet',
+				magnitude: 1,
 				children: [],
 			},
 		]
@@ -660,6 +692,7 @@ function magnetRightClick(click) {
 			{
 				basis: 'z',
 				event: 'magnet',
+				magnitude: 1,
 				children: [],
 			},
 		]
