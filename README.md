@@ -1,6 +1,6 @@
 # Spins Laboratory Simulation
 
-This project is a re-write of [Daniel V Schroeder's spins laboratory simulation](https://physics.weber.edu/schroeder/software/Spins.html), which supplements the first three chapters [David McIntyre's introductory Quantum Mechanics textbook](https://www.pearson.com/us/higher-education/program/Mc-Intyre-Quantum-Mechanics/PGM64990.html).
+This project is a re-write of [Daniel V. Schroeder's spins laboratory simulation](https://physics.weber.edu/schroeder/software/Spins.html), which supplements the first three chapters of [David McIntyre's introductory Quantum Mechanics textbook](https://www.pearson.com/us/higher-education/program/Mc-Intyre-Quantum-Mechanics/PGM64990.html).
 
 The program simulates the results of consecutive ideal measurements of electron spin. Mirroring the textbook, experimental setups are displayed as tree graphs with Stern-Gerlach analyzers as nodes. Experimental setups are configured by the student so that they may reckon with [complementary physical variables](https://en.wikipedia.org/wiki/Complementarity_(physics)). This simulation is a useful tool when using a [spins-first approach](file:///tmp/mozilla_geo0/PERC15_Sadaghiani.pdf) to teaching quantum mechanics.
 
@@ -46,8 +46,11 @@ npm run build
 ````
 2. Open [index.html](index.html) in a browser. You may need to [allow CORS in Firefox](https://stackoverflow.com/a/48957475).
 
+## mathjs
+mathjs is cloned locally rather than installed via npm. This is so the `maxSearchSize` parameter may be increased for the matrix exponential approximation function `expm`. Unfortunately this parameter is not configurable, and increasing it is necessary for computing the magnet propagator.
+
 ## TODO
 - Send individual electrons through to counters
+- Code chunking
+- Clean up GUI code
 - Spin-1
-- Magnets
-- Reduce bundle size
