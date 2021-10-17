@@ -3,13 +3,15 @@ import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
 import get from 'lodash/get';
+import initial from 'lodash/initial';
 import findIndex from 'lodash/findIndex';
 import katex from 'katex';
 import omitDeep from 'deepdash/omitDeep';
+import findDeep from 'deepdash/findDeep';
 
 // Import math modules in a way that minimizes bundle size
-import {create, roundDependencies, piDependencies} from '../mathjs/lib/esm/index.js';
-const {round, pi} = create({roundDependencies, piDependencies});
+import {create, roundDependencies, piDependencies, randomDependencies} from '../mathjs/lib/esm/index.js';
+const {round, pi, random} = create({roundDependencies, piDependencies, randomDependencies});
 
 // Default experimental setup
 let histories = {
@@ -86,9 +88,9 @@ function getRoot(histories) {
 			}
 		}
 
-		// Label probabilities at leaves
+		// Label count at leaves
 		if (d.data.probability !== undefined) {
-			d.probability = round((d.data.probability), 2);
+			d.count = d.data.count;
 		}
 	});
 
@@ -523,7 +525,7 @@ function drawCounters(counters, source) {
 		.attr('x', -0.35 * nodeLength)
 		.attr('y', -0.175 * nodeLength)
 		.append('xhtml:body')
-		.html(d => katex.renderToString(`\\LARGE{${d.probability}}`));
+		.html(d => katex.renderToString(`\\LARGE{${d.count}}`));
 
 	counters
 		.merge(counterEnter)
@@ -561,9 +563,6 @@ function basisClick(click) {
 
 		return child;
 	}));
-
-	root = getRoot(histories);
-	draw(root);
 }
 
 function slider(click, parameter) {
@@ -603,7 +602,6 @@ function eventLeftClick(click, event) {
 	}
 
 	path.push('children');
-	console.log(path);
 	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
 		? [
 			{
@@ -706,6 +704,40 @@ function magnetRightClick(click) {
 	draw(root);
 }
 
+function launchElectron() {
+	// Choose a history
+	const sample = random();
+	let probabilitySum = 0;
+	const history = findDeep(histories, (value, key) => {
+		if (key === 'probability') {
+			probabilitySum += value;
+			return (probabilitySum >= sample) || (probabilitySum === 1);
+		}
+
+		return false;
+	}, {pathFormat: 'array'});
+	const path = initial(history.context._item.path);
+	const count = history.parent.count + 1;
+	set(histories, path.concat(['count']), count);
+	set(root, path.concat(['count']), count);
+	draw(root);
+}
+
+// Start/stop
+let electronLauncher = null;
+document.getElementById('enable').onclick = function () {
+	if (electronLauncher) {
+		clearInterval(electronLauncher);
+		electronLauncher = null;
+		document.getElementById('enable').innerHTML = 'Start';
+	} else {
+		electronLauncher = setInterval(() => {
+			launchElectron();
+		}, 250);
+		document.getElementById('enable').innerHTML = 'Stop';
+	}
+};
+
 // Config file reader
 document.getElementById('import').onclick = function () {
 	const {files} = document.getElementById('selectFiles');
@@ -726,7 +758,7 @@ document.getElementById('import').onclick = function () {
 // Config file saver
 document.getElementById('export').onclick = function () {
 	const a = document.createElement('a');
-	const file = new Blob([JSON.stringify(omitDeep(histories, 'probability'), null, 2)], {type: 'application/json'});
+	const file = new Blob([JSON.stringify(omitDeep(histories, ['probability', 'count']), null, 2)], {type: 'application/json'});
 	a.href = URL.createObjectURL(file);
 	a.download = 'histories.json';
 	a.click();

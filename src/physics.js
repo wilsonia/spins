@@ -81,6 +81,7 @@ function computeProbabilities(histories) {
 			, history);
 		});
 		value.probability = probability(history);
+		value.count = 0;
 		return value;
 	}, {leavesOnly: true, childrenPath: 'children', pathFormat: 'array'});
 }
