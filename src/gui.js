@@ -738,8 +738,18 @@ document.getElementById('enable').onclick = function () {
 	}
 };
 
+// Reset counters
+document.getElementById('reset').onclick = function () {
+	root = getRoot(histories);
+	draw(root);
+};
+
 // Config file reader
-document.getElementById('import').onclick = function () {
+document.getElementById('selectFiles').onclick = function () {
+	document.getElementById('selectFiles').value = null;
+};
+
+document.getElementById('selectFiles').onchange = function () {
 	const {files} = document.getElementById('selectFiles');
 	if (files.length <= 0) {
 		return false;
