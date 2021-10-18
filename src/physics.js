@@ -67,7 +67,8 @@ function magnetPropagator(theta, phi, magnitude) {
 	 The class operator is used to compute history probability, which is then assigned as the leaf's value.
 */
 function computeProbabilities(histories) {
-	return eachDeep(histories, (value, key, parent, context) => {
+	const historiesCopy = JSON.parse(JSON.stringify(histories));
+	return eachDeep(historiesCopy, (value, key, parent, context) => {
 		let history = identity(2);
 		let path = [];
 		context.path.filter(element => (element !== 'children')).forEach(element => {
@@ -81,7 +82,6 @@ function computeProbabilities(histories) {
 			, history);
 		});
 		value.probability = probability(history);
-		value.count = 0;
 		return value;
 	}, {leavesOnly: true, childrenPath: 'children', pathFormat: 'array'});
 }
