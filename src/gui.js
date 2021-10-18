@@ -498,18 +498,28 @@ function drawCounters(counters, source) {
 		.attr('width', nodeLength / 2)
 		.attr('height', nodeLength / 4)
 		.style('pointer-events', 'none')
-		.attr('x', -0.2 * nodeLength)
-		.attr('y', 0.15 * nodeLength)
+		.attr('x', -0.35 * nodeLength)
+		.attr('y', -0.4 * nodeLength)
 		.append('xhtml:body')
 		.html(d => katex.renderToString(`\\LARGE{${d.data.count}}`));
 
 	counterEnter
 		.append('rect')
-		.attr('width', 0.65 * nodeLength)
-		.attr('x', -0.2 * nodeLength)
+		.attr('width', 0.7 * nodeLength)
+		.attr('x', -0.3 * nodeLength)
 		.attr('y', -nodeLength / 16)
 		.attr('height', nodeLength / 8)
 		.attr('fill', 'white')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
+
+	counterEnter
+		.append('rect')
+		.attr('width', d => (0.7 * nodeLength) * (d.data.count / 100))
+		.attr('x', -0.3 * nodeLength)
+		.attr('y', -nodeLength / 16)
+		.attr('height', nodeLength / 8)
+		.attr('fill', 'LightSteelBlue')
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey');
 
@@ -522,6 +532,7 @@ function drawCounters(counters, source) {
 
 // Define click behavior
 function basisClick(click) {
+	stop();
 	let parent = click.target.__data__;
 	const path = [];
 	while (parent.parent) {
@@ -555,6 +566,7 @@ function basisClick(click) {
 }
 
 function slider(click, parameter) {
+	stop();
 	let parent = click.target.__data__;
 	const path = [];
 	while (parent.parent) {
@@ -710,11 +722,14 @@ function recordEvent() {
 		return false;
 	}, {pathFormat: 'array'});
 	const path = initial(branch.context._item.path);
-	console.log(branch.parent);
 	const count = branch.parent.count + 1;
-	set(root, path.concat(['count']), count);
-	console.log(root);
-	draw(root);
+	if (count > 100) {
+		root = getRoot(histories);
+		draw(root);
+	} else {
+		set(root, path.concat(['count']), count);
+		draw(root);
+	}
 }
 
 // Start/stop
@@ -731,7 +746,7 @@ document.getElementById('enable').onclick = function () {
 	} else {
 		eventRecorder = setInterval(() => {
 			recordEvent();
-		}, 250);
+		}, 10);
 		document.getElementById('enable').innerHTML = 'Stop';
 	}
 };
