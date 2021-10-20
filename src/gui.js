@@ -6,7 +6,6 @@ import get from 'lodash/get';
 import initial from 'lodash/initial';
 import findIndex from 'lodash/findIndex';
 import katex from 'katex';
-import omitDeep from 'deepdash/omitDeep';
 import findDeep from 'deepdash/findDeep';
 
 // Import math modules in a way that minimizes bundle size
@@ -19,31 +18,7 @@ let histories = {
 		{
 			basis: 'z',
 			event: 'spinUp',
-			children: [
-				{
-					basis: 'x',
-					event: 'spinUp',
-					children: [
-						{
-							basis: 'z',
-							event: 'spinUp',
-							children: [
-							],
-						},
-						{
-							basis: 'z',
-							event: 'spinDown',
-							children: [
-							],
-						},
-					],
-				},
-				{
-					basis: 'x',
-					event: 'spinDown',
-					children: [],
-				},
-			],
+			children: [],
 		},
 		{
 			basis: 'z',
@@ -55,7 +30,7 @@ let histories = {
 
 const nodeLength = 120;
 const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength * 1.5, left: nodeLength};
-const width = 1200;
+const width = 1300;
 const dx = 65;
 const dy = width / 8;
 const diagonal = d3
@@ -89,8 +64,9 @@ function getRoot(histories) {
 		}
 
 		// Label count at leaves
-		if (d.data.probability !== undefined) {
-			d.count = d.data.count;
+		if (d.data.children.length === 0) {
+			d.probability = d.data.probability;
+			d.data.count = 0;
 		}
 	});
 
@@ -216,7 +192,7 @@ function drawAnalyzers(analyzers, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => eventLeftClick(click, 'spinUp'))
+		.on('mousedown', click => eventLeftClick(click, 'spinUp'))
 		.on('contextmenu', click => eventRightClick(click, 'spinUp'));
 
 	// Draw spin-down port
@@ -240,7 +216,7 @@ function drawAnalyzers(analyzers, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => eventLeftClick(click, 'spinDown'))
+		.on('mousedown', click => eventLeftClick(click, 'spinDown'))
 		.on('contextmenu', click => eventRightClick(click, 'spinDown'));
 
 	// Label analyzers
@@ -372,7 +348,7 @@ function drawMagnets(magnets, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => magnetLeftClick(click))
+		.on('mousedown', click => magnetLeftClick(click))
 		.on('contextmenu', click => magnetRightClick(click));
 
 	// Label magnets
@@ -523,9 +499,29 @@ function drawCounters(counters, source) {
 		.attr('height', nodeLength / 4)
 		.style('pointer-events', 'none')
 		.attr('x', -0.35 * nodeLength)
-		.attr('y', -0.175 * nodeLength)
+		.attr('y', -0.4 * nodeLength)
 		.append('xhtml:body')
-		.html(d => katex.renderToString(`\\LARGE{${d.count}}`));
+		.html(d => katex.renderToString(`\\LARGE{${d.data.count}}`));
+
+	counterEnter
+		.append('rect')
+		.attr('width', 0.7 * nodeLength)
+		.attr('x', -0.3 * nodeLength)
+		.attr('y', -nodeLength / 16)
+		.attr('height', nodeLength / 8)
+		.attr('fill', 'white')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
+
+	counterEnter
+		.append('rect')
+		.attr('width', d => (0.7 * nodeLength) * (d.data.count / 100))
+		.attr('x', -0.3 * nodeLength)
+		.attr('y', -nodeLength / 16)
+		.attr('height', nodeLength / 8)
+		.attr('fill', 'LightSteelBlue')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
 
 	counters
 		.merge(counterEnter)
@@ -536,6 +532,7 @@ function drawCounters(counters, source) {
 
 // Define click behavior
 function basisClick(click) {
+	stop();
 	let parent = click.target.__data__;
 	const path = [];
 	while (parent.parent) {
@@ -563,9 +560,13 @@ function basisClick(click) {
 
 		return child;
 	}));
+
+	root = getRoot(histories);
+	draw(root);
 }
 
 function slider(click, parameter) {
+	stop();
 	let parent = click.target.__data__;
 	const path = [];
 	while (parent.parent) {
@@ -591,36 +592,40 @@ function slider(click, parameter) {
 }
 
 function eventLeftClick(click, event) {
-	let parent = click.target.__data__;
-	const path = ['children', findIndex(parent.children, child =>
-		(child.data.basis === parent.basis & child.data.event === event))];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
+	stop();
+	if (click.which === 1) {
+		let parent = click.target.__data__;
+		const path = ['children', findIndex(parent.children, child =>
+			(child.data.basis === parent.basis & child.data.event === event))];
+		while (parent.parent) {
+			const childIndex = findIndex(parent.parent.data.children, child =>
+				(child.basis === parent.data.basis & child.event === parent.data.event));
+			path.unshift('children', childIndex);
+			parent = parent.parent;
+		}
 
-	path.push('children');
-	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
-		? [
-			{
-				basis: 'z',
-				event: 'spinUp',
-				children: [],
-			},
-			{
-				basis: 'z',
-				event: 'spinDown',
-				children: [],
-			},
-		]
-		: []);
-	root = getRoot(histories);
-	draw(root);
+		path.push('children');
+		histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
+			? [
+				{
+					basis: 'z',
+					event: 'spinUp',
+					children: [],
+				},
+				{
+					basis: 'z',
+					event: 'spinDown',
+					children: [],
+				},
+			]
+			: []);
+		root = getRoot(histories);
+		draw(root);
+	}
 }
 
 function eventRightClick(click, event) {
+	stop();
 	click.preventDefault();
 	let parent = click.target.__data__;
 	const path = ['children', findIndex(parent.children, child =>
@@ -648,36 +653,40 @@ function eventRightClick(click, event) {
 }
 
 function magnetLeftClick(click) {
-	let parent = click.target.__data__;
-	const path = ['children', findIndex(parent.children, child =>
-		(child.data.basis === parent.basis))];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
+	stop();
+	if (click.which === 1) {
+		let parent = click.target.__data__;
+		const path = ['children', findIndex(parent.children, child =>
+			(child.data.basis === parent.basis))];
+		while (parent.parent) {
+			const childIndex = findIndex(parent.parent.data.children, child =>
+				(child.basis === parent.data.basis & child.event === parent.data.event));
+			path.unshift('children', childIndex);
+			parent = parent.parent;
+		}
 
-	path.push('children');
-	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
-		? [
-			{
-				basis: 'z',
-				event: 'spinUp',
-				children: [],
-			},
-			{
-				basis: 'z',
-				event: 'spinDown',
-				children: [],
-			},
-		]
-		: []);
-	root = getRoot(histories);
-	draw(root);
+		path.push('children');
+		histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
+			? [
+				{
+					basis: 'z',
+					event: 'spinUp',
+					children: [],
+				},
+				{
+					basis: 'z',
+					event: 'spinDown',
+					children: [],
+				},
+			]
+			: []);
+		root = getRoot(histories);
+		draw(root);
+	}
 }
 
 function magnetRightClick(click) {
+	stop();
 	click.preventDefault();
 	let parent = click.target.__data__;
 	const path = ['children', findIndex(parent.children, child =>
@@ -704,11 +713,11 @@ function magnetRightClick(click) {
 	draw(root);
 }
 
-function launchElectron() {
+function recordEvent() {
 	// Choose a history
 	const sample = random();
 	let probabilitySum = 0;
-	const history = findDeep(histories, (value, key) => {
+	const branch = findDeep(root, (value, key) => {
 		if (key === 'probability') {
 			probabilitySum += value;
 			return (probabilitySum >= sample) || (probabilitySum === 1);
@@ -716,30 +725,48 @@ function launchElectron() {
 
 		return false;
 	}, {pathFormat: 'array'});
-	const path = initial(history.context._item.path);
-	const count = history.parent.count + 1;
-	set(histories, path.concat(['count']), count);
-	set(root, path.concat(['count']), count);
-	draw(root);
+	const path = initial(branch.context._item.path);
+	const count = branch.parent.count + 1;
+	if (count > 100) {
+		root = getRoot(histories);
+		draw(root);
+	} else {
+		set(root, path.concat(['count']), count);
+		draw(root);
+	}
 }
 
 // Start/stop
-let electronLauncher = null;
+let eventRecorder = null;
+function stop() {
+	clearInterval(eventRecorder);
+	eventRecorder = null;
+	document.getElementById('enable').innerHTML = 'Start';
+}
+
 document.getElementById('enable').onclick = function () {
-	if (electronLauncher) {
-		clearInterval(electronLauncher);
-		electronLauncher = null;
-		document.getElementById('enable').innerHTML = 'Start';
+	if (eventRecorder) {
+		stop();
 	} else {
-		electronLauncher = setInterval(() => {
-			launchElectron();
-		}, 250);
+		eventRecorder = setInterval(() => {
+			recordEvent();
+		}, 10);
 		document.getElementById('enable').innerHTML = 'Stop';
 	}
 };
 
+// Reset counters
+document.getElementById('reset').onclick = function () {
+	root = getRoot(histories);
+	draw(root);
+};
+
 // Config file reader
-document.getElementById('import').onclick = function () {
+document.getElementById('selectFiles').onclick = function () {
+	document.getElementById('selectFiles').value = null;
+};
+
+document.getElementById('selectFiles').onchange = function () {
 	const {files} = document.getElementById('selectFiles');
 	if (files.length <= 0) {
 		return false;
@@ -758,7 +785,7 @@ document.getElementById('import').onclick = function () {
 // Config file saver
 document.getElementById('export').onclick = function () {
 	const a = document.createElement('a');
-	const file = new Blob([JSON.stringify(omitDeep(histories, ['probability', 'count']), null, 2)], {type: 'application/json'});
+	const file = new Blob([JSON.stringify(histories, null, 2)], {type: 'application/json'});
 	a.href = URL.createObjectURL(file);
 	a.download = 'histories.json';
 	a.click();
