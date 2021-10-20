@@ -192,7 +192,7 @@ function drawAnalyzers(analyzers, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => eventLeftClick(click, 'spinUp'))
+		.on('mousedown', click => eventLeftClick(click, 'spinUp'))
 		.on('contextmenu', click => eventRightClick(click, 'spinUp'));
 
 	// Draw spin-down port
@@ -216,7 +216,7 @@ function drawAnalyzers(analyzers, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => eventLeftClick(click, 'spinDown'))
+		.on('mousedown', click => eventLeftClick(click, 'spinDown'))
 		.on('contextmenu', click => eventRightClick(click, 'spinDown'));
 
 	// Label analyzers
@@ -348,7 +348,7 @@ function drawMagnets(magnets, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('click', click => magnetLeftClick(click))
+		.on('mousedown', click => magnetLeftClick(click))
 		.on('contextmenu', click => magnetRightClick(click));
 
 	// Label magnets
@@ -593,33 +593,35 @@ function slider(click, parameter) {
 
 function eventLeftClick(click, event) {
 	stop();
-	let parent = click.target.__data__;
-	const path = ['children', findIndex(parent.children, child =>
-		(child.data.basis === parent.basis & child.data.event === event))];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
+	if (click.which === 1) {
+		let parent = click.target.__data__;
+		const path = ['children', findIndex(parent.children, child =>
+			(child.data.basis === parent.basis & child.data.event === event))];
+		while (parent.parent) {
+			const childIndex = findIndex(parent.parent.data.children, child =>
+				(child.basis === parent.data.basis & child.event === parent.data.event));
+			path.unshift('children', childIndex);
+			parent = parent.parent;
+		}
 
-	path.push('children');
-	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
-		? [
-			{
-				basis: 'z',
-				event: 'spinUp',
-				children: [],
-			},
-			{
-				basis: 'z',
-				event: 'spinDown',
-				children: [],
-			},
-		]
-		: []);
-	root = getRoot(histories);
-	draw(root);
+		path.push('children');
+		histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
+			? [
+				{
+					basis: 'z',
+					event: 'spinUp',
+					children: [],
+				},
+				{
+					basis: 'z',
+					event: 'spinDown',
+					children: [],
+				},
+			]
+			: []);
+		root = getRoot(histories);
+		draw(root);
+	}
 }
 
 function eventRightClick(click, event) {
@@ -652,33 +654,35 @@ function eventRightClick(click, event) {
 
 function magnetLeftClick(click) {
 	stop();
-	let parent = click.target.__data__;
-	const path = ['children', findIndex(parent.children, child =>
-		(child.data.basis === parent.basis))];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
+	if (click.which === 1) {
+		let parent = click.target.__data__;
+		const path = ['children', findIndex(parent.children, child =>
+			(child.data.basis === parent.basis))];
+		while (parent.parent) {
+			const childIndex = findIndex(parent.parent.data.children, child =>
+				(child.basis === parent.data.basis & child.event === parent.data.event));
+			path.unshift('children', childIndex);
+			parent = parent.parent;
+		}
 
-	path.push('children');
-	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
-		? [
-			{
-				basis: 'z',
-				event: 'spinUp',
-				children: [],
-			},
-			{
-				basis: 'z',
-				event: 'spinDown',
-				children: [],
-			},
-		]
-		: []);
-	root = getRoot(histories);
-	draw(root);
+		path.push('children');
+		histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
+			? [
+				{
+					basis: 'z',
+					event: 'spinUp',
+					children: [],
+				},
+				{
+					basis: 'z',
+					event: 'spinDown',
+					children: [],
+				},
+			]
+			: []);
+		root = getRoot(histories);
+		draw(root);
+	}
 }
 
 function magnetRightClick(click) {
