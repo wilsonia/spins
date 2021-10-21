@@ -1,12 +1,11 @@
 import {computeProbabilities} from './physics.js';
 import {eventClick} from './eventClick.js';
 import {magnetClick} from './magnetClick.js';
+import {counterClick, counterBlockClick} from './counterClick.js';
 import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
 import get from 'lodash/get';
-import last from 'lodash/last';
-import pullAt from 'lodash/pullAt';
 import initial from 'lodash/initial';
 import findIndex from 'lodash/findIndex';
 import katex from 'katex';
@@ -729,22 +728,7 @@ function drawCounterBlocks(counterBlocks, source) {
 		.attr('stroke', 'transparent')
 		.on('mousedown', click => {
 			stop();
-			let {parent} = click.target.__data__;
-			const {event} = click.target.__data__.data;
-			const path = ['children', findIndex(parent.children, child =>
-				(child.data.basis === parent.basis && child.data.event === event))];
-			while (parent.parent) {
-				const childIndex = findIndex(parent.parent.data.children, child =>
-					(child.basis === parent.data.basis & child.event === parent.data.event));
-				path.unshift('children', childIndex);
-				parent = parent.parent;
-			}
-
-			const children = get(histories, initial(path));
-			children[(last(path) === 0) ? 1 : 0].event = 'identity';
-			pullAt(children, last(path));
-			histories = set(histories, initial(path), children);
-			root = getRoot(histories);
+			root = getRoot(counterBlockClick(click, histories));
 			draw(root);
 		});
 
@@ -784,20 +768,7 @@ function drawCounters(counters, source) {
 		.attr('stroke', 'grey')
 		.on('mousedown', click => {
 			stop();
-			let {parent} = click.target.__data__;
-			const {event} = click.target.__data__.data;
-			const path = ['children', findIndex(parent.children, child =>
-				(child.data.basis === parent.basis && child.data.event === event))];
-			while (parent.parent) {
-				const childIndex = findIndex(parent.parent.data.children, child =>
-					(child.basis === parent.data.basis & child.event === parent.data.event));
-				path.unshift('children', childIndex);
-				parent = parent.parent;
-			}
-
-			path.push('ignored');
-			histories = set(histories, path, true);
-			root = getRoot(histories);
+			root = getRoot(counterClick(click, histories));
 			draw(root);
 		});
 
@@ -812,20 +783,7 @@ function drawCounters(counters, source) {
 		.attr('stroke', 'grey')
 		.on('mousedown', click => {
 			stop();
-			let {parent} = click.target.__data__;
-			const {event} = click.target.__data__.data;
-			const path = ['children', findIndex(parent.children, child =>
-				(child.data.basis === parent.basis && child.data.event === event))];
-			while (parent.parent) {
-				const childIndex = findIndex(parent.parent.data.children, child =>
-					(child.basis === parent.data.basis & child.event === parent.data.event));
-				path.unshift('children', childIndex);
-				parent = parent.parent;
-			}
-
-			path.push('ignored');
-			histories = set(histories, path, true);
-			root = getRoot(histories);
+			root = getRoot(counterClick(click, histories));
 			draw(root);
 		});
 
