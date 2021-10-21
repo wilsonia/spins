@@ -24,7 +24,24 @@ let histories = {
 		{
 			basis: 'z',
 			event: 'spinDown',
-			children: [],
+			children: [
+				{
+					basis: 'z',
+					event: 'identity',
+					children: [
+						{
+							basis: 'z',
+							event: 'spinUp',
+							children: [],
+						},
+						{
+							basis: 'z',
+							event: 'spinDown',
+							children: [],
+						},
+					],
+				},
+			],
 		},
 	],
 };
