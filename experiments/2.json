@@ -1,0 +1,25 @@
+{
+  "children": [
+    {
+      "basis": "z",
+      "event": "spinUp",
+      "children": [
+        {
+          "basis": "x",
+          "event": "spinUp",
+          "children": []
+        },
+        {
+          "basis": "x",
+          "event": "spinDown",
+          "children": []
+        }
+      ]
+    },
+    {
+      "basis": "z",
+      "event": "spinDown",
+      "children": []
+    }
+  ]
+}
