@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
 import get from 'lodash/get';
+import omit from 'lodash/omit';
 import initial from 'lodash/initial';
 import findIndex from 'lodash/findIndex';
 import katex from 'katex';
@@ -23,7 +24,6 @@ let histories = {
 		{
 			basis: 'z',
 			event: 'spinDown',
-			ignored: true,
 			children: [],
 		},
 	],
@@ -532,8 +532,7 @@ function drawCounterBlocks(counterBlocks, source) {
 				parent = parent.parent;
 			}
 
-			path.push('ignored');
-			histories = set(histories, path, false);
+			histories = set(histories, path, omit(get(histories, path), 'ignored'));
 			root = getRoot(histories);
 			draw(root);
 		});
