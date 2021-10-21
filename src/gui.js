@@ -23,6 +23,7 @@ let histories = {
 		{
 			basis: 'z',
 			event: 'spinDown',
+			ignored: true,
 			children: [],
 		},
 	],
@@ -128,8 +129,14 @@ function draw(source) {
 	drawMagnets(magnets, source);
 
 	// Draw counters
-	const counters = gNode.selectAll('g').data(nodes.filter(node => (node.data.probability !== undefined)), d => d.id);
+	const counters = gNode.selectAll('g').data(nodes.filter(node => (
+		node.data.probability !== undefined && node.data.ignored !== true)), d => d.id);
 	drawCounters(counters, source);
+
+	// Draw counter blocks
+	const counterBlocks = gNode.selectAll('g').data(nodes.filter(node => (
+		node.data.probability !== undefined && node.data.ignored === true)), d => d.id);
+	drawCounterBlocks(counterBlocks, source);
 
 	// Update the links…
 	const link = gLink.selectAll('path').data(links, d => d.target.id);
@@ -238,7 +245,7 @@ function drawAnalyzers(analyzers, source) {
 		.attr('height', nodeLength / 3)
 		.attr('opacity', 0)
 		.style('pointer-events', 'visible')
-		.on('click', click => basisClick(click));
+		.on('mousedown', click => basisClick(click));
 
 	analyzerEnter
 		.append('foreignObject')
@@ -258,7 +265,7 @@ function drawAnalyzers(analyzers, source) {
 		.attr('height', nodeLength / 4)
 		.attr('opacity', 0)
 		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
-		.on('click', click => {
+		.on('mousedown', click => {
 			svg.selectAll('.slider').remove();
 			svg.selectAll('.axis').remove();
 			svg.append('foreignObject')
@@ -294,7 +301,7 @@ function drawAnalyzers(analyzers, source) {
 		.attr('height', nodeLength / 4)
 		.attr('opacity', 0)
 		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
-		.on('click', click => {
+		.on('mousedown', click => {
 			svg.selectAll('.slider').remove();
 			svg.selectAll('.axis').remove();
 			svg.append('foreignObject')
@@ -370,7 +377,7 @@ function drawMagnets(magnets, source) {
 		.attr('height', nodeLength / 3)
 		.attr('opacity', 0)
 		.style('pointer-events', 'visible')
-		.on('click', click => basisClick(click));
+		.on('mousedown', click => basisClick(click));
 
 	magnetEnter
 		.append('foreignObject')
@@ -389,7 +396,7 @@ function drawMagnets(magnets, source) {
 		.attr('width', 3 * nodeLength / 4)
 		.attr('height', nodeLength / 4)
 		.attr('opacity', 0)
-		.on('click', click => {
+		.on('mousedown', click => {
 			svg.selectAll('.slider').remove();
 			svg.selectAll('.axis').remove();
 			svg.append('foreignObject')
@@ -425,7 +432,7 @@ function drawMagnets(magnets, source) {
 		.attr('height', nodeLength / 4)
 		.attr('opacity', 0)
 		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
-		.on('click', click => {
+		.on('mousedown', click => {
 			svg.selectAll('.slider').remove();
 			svg.selectAll('.axis').remove();
 			svg.append('foreignObject')
@@ -461,7 +468,7 @@ function drawMagnets(magnets, source) {
 		.attr('height', nodeLength / 4)
 		.attr('opacity', 0)
 		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
-		.on('click', click => {
+		.on('mousedown', click => {
 			svg.selectAll('.slider').remove();
 			svg.selectAll('.axis').remove();
 			svg.append('foreignObject')
@@ -480,6 +487,31 @@ function drawMagnets(magnets, source) {
 
 	magnets
 		.merge(magnetEnter)
+		.attr('transform', d => `translate(${d.y},${d.x})`)
+		.attr('fill-opacity', 1)
+		.attr('stroke-opacity', 1);
+}
+
+function drawCounterBlocks(counterBlocks, source) {
+	const counterBlockEnter = counterBlocks
+		.enter()
+		.append('g')
+		.attr('transform', `translate(${source.y0},${source.x0})`)
+		.attr('fill-opacity', 0)
+		.attr('stroke-opacity', 0);
+
+	counterBlockEnter
+		.append('rect')
+		.attr('width', 0.01 * nodeLength)
+		.attr('x', -0.35 * nodeLength)
+		.attr('y', -nodeLength / 8)
+		.attr('height', nodeLength / 4)
+		.attr('fill', 'grey')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
+
+	counterBlocks
+		.merge(counterBlockEnter)
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
