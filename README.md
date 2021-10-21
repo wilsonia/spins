@@ -50,7 +50,8 @@ npm run build
 mathjs is cloned locally rather than installed via npm. This is so the `maxSearchSize` parameter may be increased for the matrix exponential approximation function `expm`. Unfortunately this parameter is not configurable, and increasing it is necessary for computing the magnet propagator.
 
 ## TODO
-- Code chunking
 - Clean up GUI code
 - Default experiments
 - Spin-1
+- License
+- Gun
