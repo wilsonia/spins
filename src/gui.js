@@ -1,5 +1,6 @@
 import {computeProbabilities} from './physics.js';
 import {eventClick} from './eventClick.js';
+import {magnetClick} from './magnetClick.js';
 import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
@@ -559,8 +560,11 @@ function drawMagnets(magnets, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('mousedown', click => magnetLeftClick(click))
-		.on('contextmenu', click => magnetRightClick(click));
+		.on('mousedown', click => {
+			stop();
+			root = getRoot(magnetClick(click, histories));
+			draw(root);
+		});
 
 	// Label magnets
 	magnetEnter
@@ -891,67 +895,6 @@ function slider(click, parameter) {
 			root = getRoot(histories);
 			draw(root);
 		});
-}
-
-function magnetLeftClick(click) {
-	stop();
-	if (click.which === 1) {
-		let parent = click.target.__data__;
-		const path = ['children', findIndex(parent.children, child =>
-			(child.data.basis === parent.basis))];
-		while (parent.parent) {
-			const childIndex = findIndex(parent.parent.data.children, child =>
-				(child.basis === parent.data.basis & child.event === parent.data.event));
-			path.unshift('children', childIndex);
-			parent = parent.parent;
-		}
-
-		path.push('children');
-		histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
-			? [
-				{
-					basis: 'z',
-					event: 'spinUp',
-					children: [],
-				},
-				{
-					basis: 'z',
-					event: 'spinDown',
-					children: [],
-				},
-			]
-			: []);
-		root = getRoot(histories);
-		draw(root);
-	}
-}
-
-function magnetRightClick(click) {
-	stop();
-	click.preventDefault();
-	let parent = click.target.__data__;
-	const path = ['children', findIndex(parent.children, child =>
-		(child.data.basis === parent.basis))];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
-
-	path.push('children');
-	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
-		? [
-			{
-				basis: 'z',
-				event: 'magnet',
-				magnitude: 1,
-				children: [],
-			},
-		]
-		: []);
-	root = getRoot(histories);
-	draw(root);
 }
 
 function recordEvent() {
