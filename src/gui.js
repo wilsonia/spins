@@ -543,7 +543,25 @@ function drawCounters(counters, source) {
 		.attr('height', nodeLength / 8)
 		.attr('fill', 'white')
 		.attr('stroke-width', 2)
-		.attr('stroke', 'grey');
+		.attr('stroke', 'grey')
+		.on('mousedown', click => {
+			stop();
+			let {parent} = click.target.__data__;
+			const {event} = click.target.__data__.data;
+			const path = ['children', findIndex(parent.children, child =>
+				(child.data.basis === parent.basis && child.data.event === event))];
+			while (parent.parent) {
+				const childIndex = findIndex(parent.parent.data.children, child =>
+					(child.basis === parent.data.basis & child.event === parent.data.event));
+				path.unshift('children', childIndex);
+				parent = parent.parent;
+			}
+
+			path.push('ignored');
+			histories = set(histories, path, true);
+			root = getRoot(histories);
+			draw(root);
+		});
 
 	counterEnter
 		.append('rect')
