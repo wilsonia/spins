@@ -1,9 +1,11 @@
 import {computeProbabilities} from './physics.js';
+import {eventClick} from './eventClick.js';
 import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
 import get from 'lodash/get';
-import omit from 'lodash/omit';
+import last from 'lodash/last';
+import pullAt from 'lodash/pullAt';
 import initial from 'lodash/initial';
 import findIndex from 'lodash/findIndex';
 import katex from 'katex';
@@ -134,10 +136,18 @@ function draw(source) {
 			window.ResizeObserver ? null : () => () => svg.dispatch('toggle'),
 		);
 
+	// Draw analyzers
 	const analyzers = gNode.selectAll('g').data(nodes.filter(
 		node => (node.data.children[0] !== undefined)).filter(
-		node => node.data.children[0].event !== 'magnet'), d => d.id);
+		node => node.data.children[0].event !== 'magnet').filter(
+		node => node.data.children[0].event !== 'identity'), d => d.id);
 	drawAnalyzers(analyzers, source);
+
+	const analyzersIgnorable = gNode.selectAll('g').data(nodes.filter(
+		node => (node.data.children[0] !== undefined)).filter(
+		node => node.data.children[0].event !== 'magnet').filter(
+		node => node.data.children[0].event === 'identity'), d => d.id);
+	drawAnalyzersIgnorable(analyzersIgnorable, source);
 
 	// Draw magnets
 	const magnets = gNode.selectAll('g').data(nodes.filter(
@@ -216,8 +226,11 @@ function drawAnalyzers(analyzers, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('mousedown', click => eventLeftClick(click, 'spinUp'))
-		.on('contextmenu', click => eventRightClick(click, 'spinUp'));
+		.on('mousedown', click => {
+			stop();
+			root = getRoot(eventClick(click, 'spinUp', histories));
+			draw(root);
+		});
 
 	// Draw spin-down port
 	analyzerEnter
@@ -240,8 +253,182 @@ function drawAnalyzers(analyzers, source) {
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey')
 		.style('pointer-events', 'visible')
-		.on('mousedown', click => eventLeftClick(click, 'spinDown'))
-		.on('contextmenu', click => eventRightClick(click, 'spinDown'));
+		.on('mousedown', click => {
+			stop();
+			root = getRoot(eventClick(click, 'spinDown', histories));
+			draw(root);
+		});
+
+	// Label analyzers
+	analyzerEnter
+		.append('foreignObject')
+		.attr('x', -0.25 * nodeLength)
+		.attr('y', -0.4 * nodeLength)
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(d => katex.renderToString(`\\Huge{\\hat{${d.basis}}}`));
+
+	analyzerEnter
+		.append('rect')
+		.attr('x', -0.25 * nodeLength)
+		.attr('y', -0.4 * nodeLength)
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 3)
+		.attr('opacity', 0)
+		.style('pointer-events', 'visible')
+		.on('mousedown', click => basisClick(click));
+
+	analyzerEnter
+		.append('foreignObject')
+		.attr('x', -0.5 * nodeLength)
+		.attr('y', -0.05 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 4)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(d => katex.renderToString((d.basis === 'n') ? `\\Large{\\theta = ${d.theta}}` : ''));
+
+	analyzerEnter
+		.append('rect')
+		.attr('x', -1 * nodeLength / 2)
+		.attr('y', -0.05 * nodeLength)
+		.attr('width', 3 * nodeLength / 4)
+		.attr('height', nodeLength / 4)
+		.attr('opacity', 0)
+		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
+		.on('mousedown', click => {
+			svg.selectAll('.slider').remove();
+			svg.selectAll('.axis').remove();
+			svg.append('foreignObject')
+				.attr('class', 'axis')
+				.attr('x', `${click.target.__data__.y + (1.25 * dx)}`)
+				.attr('y', `${click.target.__data__.x + (0.75 * dx)}`)
+				.attr('width', nodeLength / 4)
+				.attr('height', nodeLength / 4)
+				.style('ponter-events', 'none')
+				.append('xhtml:body')
+				.html(katex.renderToString('\\LARGE{\\theta}'));
+			svg.append('g')
+				.attr('pointer-events', 'all')
+				.attr('transform', `translate(${click.target.__data__.y + dx}, ${click.target.__data__.x + (1.4 * dx)})`)
+				.call(slider(click, 'theta'));
+		});
+
+	analyzerEnter
+		.append('foreignObject')
+		.attr('x', -0.5 * nodeLength)
+		.attr('y', 0.15 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 4)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(d => katex.renderToString(d.basis === 'n' ? `\\Large{\\phi = ${d.phi}}` : ''));
+
+	analyzerEnter
+		.append('rect')
+		.attr('x', -1 * nodeLength / 2)
+		.attr('y', 0.18 * nodeLength)
+		.attr('width', 3 * nodeLength / 4)
+		.attr('height', nodeLength / 4)
+		.attr('opacity', 0)
+		.style('pointer-events', (d => (d.basis === 'n') ? 'visible' : 'none'))
+		.on('mousedown', click => {
+			svg.selectAll('.slider').remove();
+			svg.selectAll('.axis').remove();
+			svg.append('foreignObject')
+				.attr('class', 'axis')
+				.attr('x', `${click.target.__data__.y + (1.25 * dx)}`)
+				.attr('y', `${click.target.__data__.x + (0.75 * dx)}`)
+				.attr('width', nodeLength / 4)
+				.attr('height', nodeLength / 4)
+				.style('ponter-events', 'none')
+				.append('xhtml:body')
+				.html(katex.renderToString('\\LARGE{\\phi}'));
+			svg.append('g')
+				.attr('transform', `translate(${click.target.__data__.y + dx}, ${click.target.__data__.x + (1.4 * dx)})`)
+				.call(slider(click, 'phi'));
+		});
+
+	analyzers
+		.merge(analyzerEnter)
+		.attr('transform', d => `translate(${d.y},${d.x})`)
+		.attr('fill-opacity', 1)
+		.attr('stroke-opacity', 1);
+}
+
+function drawAnalyzersIgnorable(analyzers, source) {
+	const analyzerEnter = analyzers
+		.enter()
+		.append('g')
+		.attr('transform', `translate(${source.y0},${source.x0})`)
+		.attr('fill-opacity', 0)
+		.attr('stroke-opacity', 0);
+	// Draw outline
+	analyzerEnter
+		.append('rect')
+		.attr('width', nodeLength)
+		.attr('x', -1 * (nodeLength / 2))
+		.attr('y', -1 * (nodeLength / 2))
+		.attr('height', nodeLength)
+		.attr('fill', 'white')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
+
+	// Draw spin-up port
+	analyzerEnter
+		.append('foreignObject')
+		.attr('x', nodeLength / 5)
+		.attr('y', -1 * (nodeLength / 2))
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(katex.renderToString('\\Huge{\\pmb{+}}'));
+
+	analyzerEnter
+		.append('rect')
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.attr('x', nodeLength / 4)
+		.attr('y', -1 * (nodeLength / 2))
+		.attr('fill', 'transparent')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey')
+		.style('pointer-events', 'visible')
+		.on('mousedown', click => {
+			stop();
+			root = getRoot(eventClick(click, 'spinUp', histories));
+			draw(root);
+		});
+
+	// Draw spin-down port
+	analyzerEnter
+		.append('foreignObject')
+		.attr('x', nodeLength / 5)
+		.attr('y', 0)
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(katex.renderToString('\\Huge{\\pmb{-}}'));
+
+	analyzerEnter
+		.append('rect')
+		.attr('width', nodeLength / 4)
+		.attr('height', nodeLength / 2)
+		.attr('x', nodeLength / 4)
+		.attr('y', 0)
+		.attr('fill', 'transparent')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey')
+		.style('pointer-events', 'visible')
+		.on('mousedown', click => {
+			stop();
+			root = getRoot(eventClick(click, 'spinDown', histories));
+			draw(root);
+		});
 
 	// Label analyzers
 	analyzerEnter
@@ -549,7 +736,10 @@ function drawCounterBlocks(counterBlocks, source) {
 				parent = parent.parent;
 			}
 
-			histories = set(histories, path, omit(get(histories, path), 'ignored'));
+			const children = get(histories, initial(path));
+			children[(last(path) === 0) ? 1 : 0].event = 'identity';
+			pullAt(children, last(path));
+			histories = set(histories, initial(path), children);
 			root = getRoot(histories);
 			draw(root);
 		});
@@ -615,7 +805,25 @@ function drawCounters(counters, source) {
 		.attr('height', nodeLength / 8)
 		.attr('fill', 'LightSteelBlue')
 		.attr('stroke-width', 2)
-		.attr('stroke', 'grey');
+		.attr('stroke', 'grey')
+		.on('mousedown', click => {
+			stop();
+			let {parent} = click.target.__data__;
+			const {event} = click.target.__data__.data;
+			const path = ['children', findIndex(parent.children, child =>
+				(child.data.basis === parent.basis && child.data.event === event))];
+			while (parent.parent) {
+				const childIndex = findIndex(parent.parent.data.children, child =>
+					(child.basis === parent.data.basis & child.event === parent.data.event));
+				path.unshift('children', childIndex);
+				parent = parent.parent;
+			}
+
+			path.push('ignored');
+			histories = set(histories, path, true);
+			root = getRoot(histories);
+			draw(root);
+		});
 
 	counters
 		.merge(counterEnter)
@@ -683,67 +891,6 @@ function slider(click, parameter) {
 			root = getRoot(histories);
 			draw(root);
 		});
-}
-
-function eventLeftClick(click, event) {
-	stop();
-	if (click.which === 1) {
-		let parent = click.target.__data__;
-		const path = ['children', findIndex(parent.children, child =>
-			(child.data.basis === parent.basis & child.data.event === event))];
-		while (parent.parent) {
-			const childIndex = findIndex(parent.parent.data.children, child =>
-				(child.basis === parent.data.basis & child.event === parent.data.event));
-			path.unshift('children', childIndex);
-			parent = parent.parent;
-		}
-
-		path.push('children');
-		histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
-			? [
-				{
-					basis: 'z',
-					event: 'spinUp',
-					children: [],
-				},
-				{
-					basis: 'z',
-					event: 'spinDown',
-					children: [],
-				},
-			]
-			: []);
-		root = getRoot(histories);
-		draw(root);
-	}
-}
-
-function eventRightClick(click, event) {
-	stop();
-	click.preventDefault();
-	let parent = click.target.__data__;
-	const path = ['children', findIndex(parent.children, child =>
-		(child.data.basis === parent.basis & child.data.event === event))];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
-
-	path.push('children');
-	histories = set(histories, path, ((get(histories, path).length === 0) & (path.length < 11))
-		? [
-			{
-				basis: 'z',
-				event: 'magnet',
-				magnitude: 1,
-				children: [],
-			},
-		]
-		: []);
-	root = getRoot(histories);
-	draw(root);
 }
 
 function magnetLeftClick(click) {
