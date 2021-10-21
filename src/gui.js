@@ -502,13 +502,41 @@ function drawCounterBlocks(counterBlocks, source) {
 
 	counterBlockEnter
 		.append('rect')
-		.attr('width', 0.01 * nodeLength)
+		.attr('width', 0.02 * nodeLength)
 		.attr('x', -0.35 * nodeLength)
 		.attr('y', -nodeLength / 8)
 		.attr('height', nodeLength / 4)
 		.attr('fill', 'grey')
 		.attr('stroke-width', 2)
 		.attr('stroke', 'grey');
+
+	counterBlockEnter
+		.append('rect')
+		.attr('width', 0.2 * nodeLength)
+		.attr('x', -0.425 * nodeLength)
+		.attr('y', -nodeLength / 8)
+		.attr('height', nodeLength / 4)
+		.attr('fill', 'transparent')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'transparent')
+		.on('mousedown', click => {
+			stop();
+			let {parent} = click.target.__data__;
+			const {event} = click.target.__data__.data;
+			const path = ['children', findIndex(parent.children, child =>
+				(child.data.basis === parent.basis && child.data.event === event))];
+			while (parent.parent) {
+				const childIndex = findIndex(parent.parent.data.children, child =>
+					(child.basis === parent.data.basis & child.event === parent.data.event));
+				path.unshift('children', childIndex);
+				parent = parent.parent;
+			}
+
+			path.push('ignored');
+			histories = set(histories, path, false);
+			root = getRoot(histories);
+			draw(root);
+		});
 
 	counterBlocks
 		.merge(counterBlockEnter)
