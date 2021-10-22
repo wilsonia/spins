@@ -18,7 +18,7 @@ import {create, roundDependencies, piDependencies, randomDependencies} from '../
 const {round, pi, random} = create({roundDependencies, piDependencies, randomDependencies});
 
 // Default experimental setup
-let histories = presetExperiments[0];
+let histories = JSON.parse(JSON.stringify(presetExperiments[0]));
 
 const nodeLength = 120;
 const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength * 1.5, left: nodeLength};
@@ -854,14 +854,14 @@ document.getElementById('reset').onclick = function () {
 
 // Preset experiment chooser
 document.getElementById('experiment').onchange = function (selectObject) {
-	histories = {
+	histories = JSON.parse(JSON.stringify({
 		1: presetExperiments[0],
 		2: presetExperiments[1],
 		3: presetExperiments[2],
 		'4a': presetExperiments[3].a,
 		'4b': presetExperiments[3].b,
 		'4c': presetExperiments[3].c,
-	}[selectObject.target.value];
+	}[selectObject.target.value]));
 	root = getRoot(histories);
 	draw(root);
 };
