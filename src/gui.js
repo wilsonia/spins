@@ -3,6 +3,7 @@ import {eventClick} from './eventClick.js';
 import {magnetClick} from './magnetClick.js';
 import {counterClick, counterBlockClick} from './counterClick.js';
 import {basisClick} from './basisClick.js';
+import {experiment1, experiment2, experiment3} from './defaultExperiments.json';
 import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
@@ -17,37 +18,7 @@ import {create, roundDependencies, piDependencies, randomDependencies} from '../
 const {round, pi, random} = create({roundDependencies, piDependencies, randomDependencies});
 
 // Default experimental setup
-let histories = {
-	children: [
-		{
-			basis: 'z',
-			event: 'spinUp',
-			children: [],
-		},
-		{
-			basis: 'z',
-			event: 'spinDown',
-			children: [
-				{
-					basis: 'z',
-					event: 'identity',
-					children: [
-						{
-							basis: 'z',
-							event: 'spinUp',
-							children: [],
-						},
-						{
-							basis: 'z',
-							event: 'spinDown',
-							children: [],
-						},
-					],
-				},
-			],
-		},
-	],
-};
+let histories = experiment1;
 
 const nodeLength = 120;
 const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength * 1.5, left: nodeLength};
