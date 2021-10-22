@@ -3,7 +3,7 @@ import {eventClick} from './eventClick.js';
 import {magnetClick} from './magnetClick.js';
 import {counterClick, counterBlockClick} from './counterClick.js';
 import {basisClick} from './basisClick.js';
-import {experiment1, experiment2, experiment3} from './defaultExperiments.json';
+import * as presetExperiments from './presetExperiments.json';
 import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
@@ -18,7 +18,7 @@ import {create, roundDependencies, piDependencies, randomDependencies} from '../
 const {round, pi, random} = create({roundDependencies, piDependencies, randomDependencies});
 
 // Default experimental setup
-let histories = experiment1;
+let histories = presetExperiments[0];
 
 const nodeLength = 120;
 const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength * 1.5, left: nodeLength};
@@ -792,7 +792,7 @@ function slider(click, parameter) {
 	path.push('children');
 
 	const parameterInit = get(histories, path)[0][parameter];
-	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(dy * 1.75).default(parameterInit)
+	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(dy * 1.75).preset(parameterInit)
 		.on('end', value => {
 			histories = set(histories, path, get(histories, path).map(child => {
 				child[parameter] = round(value, 2);
