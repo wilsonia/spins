@@ -2,6 +2,7 @@ import {computeProbabilities} from './physics.js';
 import {eventClick} from './eventClick.js';
 import {magnetClick} from './magnetClick.js';
 import {counterClick, counterBlockClick} from './counterClick.js';
+import {basisClick} from './basisClick.js';
 import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
@@ -278,7 +279,11 @@ function drawAnalyzers(analyzers, source) {
 		.attr('height', nodeLength / 3)
 		.attr('opacity', 0)
 		.style('pointer-events', 'visible')
-		.on('mousedown', click => basisClick(click));
+		.on('mousedown', click => {
+			stop();
+			root = getRoot(basisClick(click, histories));
+			draw(root);
+		});
 
 	analyzerEnter
 		.append('foreignObject')
@@ -449,7 +454,11 @@ function drawAnalyzersIgnorable(analyzers, source) {
 		.attr('height', nodeLength / 3)
 		.attr('opacity', 0)
 		.style('pointer-events', 'visible')
-		.on('mousedown', click => basisClick(click));
+		.on('mousedown', click => {
+			stop();
+			root = getRoot(basisClick(click, histories));
+			draw(root);
+		});
 
 	analyzerEnter
 		.append('foreignObject')
@@ -584,7 +593,11 @@ function drawMagnets(magnets, source) {
 		.attr('height', nodeLength / 3)
 		.attr('opacity', 0)
 		.style('pointer-events', 'visible')
-		.on('mousedown', click => basisClick(click));
+		.on('mousedown', click => {
+			stop();
+			root = getRoot(basisClick(click, histories));
+			draw(root);
+		});
 
 	magnetEnter
 		.append('foreignObject')
@@ -792,41 +805,6 @@ function drawCounters(counters, source) {
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
-}
-
-// Define click behavior
-function basisClick(click) {
-	stop();
-	let parent = click.target.__data__;
-	const path = [];
-	while (parent.parent) {
-		const childIndex = findIndex(parent.parent.data.children, child =>
-			(child.basis === parent.data.basis & child.event === parent.data.event));
-		path.unshift('children', childIndex);
-		parent = parent.parent;
-	}
-
-	path.push('children');
-
-	histories = set(histories, path, get(histories, path).map(child => {
-		child.basis = {
-			z: 'x',
-			x: 'y',
-			y: 'n',
-			n: 'z',
-		}[child.basis];
-		child.theta = undefined;
-		child.phi = undefined;
-		if ((child.basis === 'n') & (child.theta === undefined)) {
-			child.theta = 0;
-			child.phi = 0;
-		}
-
-		return child;
-	}));
-
-	root = getRoot(histories);
-	draw(root);
 }
 
 function slider(click, parameter) {
