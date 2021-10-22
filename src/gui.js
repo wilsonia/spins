@@ -852,6 +852,20 @@ document.getElementById('reset').onclick = function () {
 	draw(root);
 };
 
+// Preset experiment chooser
+document.getElementById('experiment').onchange = function (selectObject) {
+	histories = {
+		1: presetExperiments[0],
+		2: presetExperiments[1],
+		3: presetExperiments[2],
+		'4a': presetExperiments[3].a,
+		'4b': presetExperiments[3].b,
+		'4c': presetExperiments[3].c,
+	}[selectObject.target.value];
+	root = getRoot(histories);
+	draw(root);
+};
+
 // Config file reader
 document.getElementById('selectFiles').onclick = function () {
 	document.getElementById('selectFiles').value = null;
