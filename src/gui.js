@@ -792,7 +792,7 @@ function slider(click, parameter) {
 	path.push('children');
 
 	const parameterInit = get(histories, path)[0][parameter];
-	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(dy * 1.75).preset(parameterInit)
+	return sliderHorizontal().min(0).max(2 * pi).step(0.01).width(dy * 1.75).default(parameterInit)
 		.on('end', value => {
 			histories = set(histories, path, get(histories, path).map(child => {
 				child[parameter] = round(value, 2);
