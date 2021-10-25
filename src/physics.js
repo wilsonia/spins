@@ -76,10 +76,19 @@ function computeProbabilities(histories) {
 			let {basis, event, theta, phi, magnitude} = get(histories, path);
 			theta = theta ?? spinOrientations[basis].theta;
 			phi = phi ?? spinOrientations[basis].phi;
-			history = multiply((event) === 'magnet'
-				? magnetPropagator(theta, phi, magnitude)
-				: projector(spinState((event === 'spinUp') ? 1 : 0, theta, phi))
-			, history);
+			switch (event) {
+				case 'magnet':
+					history = multiply(magnetPropagator(theta, phi, magnitude), history);
+					break;
+				case 'spinUp':
+					history = multiply(projector(spinState(true, theta, phi)), history);
+					break;
+				case 'spinDown':
+					history = multiply(projector(spinState(false, theta, phi)), history);
+					break;
+				default:
+					break;
+			}
 		});
 		value.probability = probability(history);
 		return value;

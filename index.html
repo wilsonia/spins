@@ -12,9 +12,20 @@
     <script type="module" src="./dist/bundle.js"></script>
 		<button id="enable">Start</button>
 		<button id="reset">Reset Counters</button>
-		<br/><br/>
-		<input type="file" id="selectFiles"/>
 		<button id="export">Save Configuration</button>
+		<br/><br/>
+		<label for="experiment">Choose a preset experiment:</label>
+		<select name="experiment" id="experiment" form="experimentform">
+		  <option value="1">Experiment 1</option>
+		  <option value="2">Experiment 2</option>
+		  <option value="3">Experiment 3</option>
+		  <option value="4a">Experiment 4a</option>
+		  <option value="4b">Experiment 4b</option>
+		  <option value="4c">Experiment 4c</option>
+		</select>
+		<br/><br/>
+		<label for="selectFiles">Or load a custom experiment:</label>
+		<input type="file" id="selectFiles"/>
 
 		<zero-md src="./directions.md" style="padding:25px 5px 15px 20px;"></zero-md>
   </body>
