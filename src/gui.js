@@ -12,6 +12,7 @@ import initial from 'lodash/initial';
 import findIndex from 'lodash/findIndex';
 import katex from 'katex';
 import findDeep from 'deepdash/findDeep';
+import eachDeep from 'deepdash/eachDeep';
 
 // Import math modules in a way that minimizes bundle size
 import {create, roundDependencies, piDependencies, randomDependencies} from '../mathjs/lib/esm/index.js';
@@ -61,6 +62,21 @@ function getRoot(histories) {
 			d.data.count = 0;
 		}
 	});
+
+	// Handle conditional probabilities
+	let ignoredEventProbabilitySum = 0;
+	eachDeep(root, value => {
+		if (value.data.ignored === true) {
+			ignoredEventProbabilitySum += value.data.probability;
+			value.data.probability = 0;
+		}
+	}, {leavesOnly: true, childrenPath: 'children'});
+
+	if (ignoredEventProbabilitySum) {
+		eachDeep(root, value => {
+			value.data.probability /= ignoredEventProbabilitySum;
+		}, {leavesOnly: true, childrenPath: 'children'});
+	}
 
 	tree(root);
 	return root;
@@ -815,7 +831,7 @@ function recordEvent() {
 		}
 
 		return false;
-	}, {pathFormat: 'array'});
+	}, {pathFormat: 'array', leavesOnly: true});
 	const path = initial(branch.context._item.path);
 	const count = branch.parent.count + 1;
 	if (count > 100) {

@@ -15,7 +15,7 @@ It accomplishes several goals:
 - Simplifies computation of probabilities by using the consistent histories approach
 - Increases readability of code
 - Imports/exports experiment configurations
-- Eliminates physics errors in Schroeder's simulation
+- Eliminates a counting error in Schroeder's simulation
 - Simplifies user interface
 - Updates tech stack
 
