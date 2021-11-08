@@ -21,6 +21,7 @@ const {round, pi, random} = create({roundDependencies, piDependencies, randomDep
 // Default experimental setup
 let histories = JSON.parse(JSON.stringify(presetExperiments[0]));
 
+// GUI constants
 const nodeLength = 120;
 const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength * 1.5, left: nodeLength};
 const width = 1300;
@@ -39,9 +40,14 @@ const svg = d3
 	.style('user-select', 'none');
 document.querySelector('#app').appendChild(svg.node());
 
+// Draw tree
+let root = getRoot(histories);
+draw(root);
+
 // Configures a d3 hierarchy for a given set of histories
 function getRoot(histories) {
 	const root = d3.hierarchy(computeProbabilities(histories));
+
 	root.x0 = dy / 2;
 	root.y0 = 0;
 	root.descendants().forEach((d, i) => {
@@ -81,10 +87,6 @@ function getRoot(histories) {
 	tree(root);
 	return root;
 }
-
-// Draw tree
-let root = getRoot(histories);
-draw(root);
 
 // Binds d3 hierarchy to svg nodes and links
 function draw(source) {
@@ -128,7 +130,8 @@ function draw(source) {
 	const analyzers = gNode.selectAll('g').data(nodes.filter(
 		node => (node.data.children[0] !== undefined)).filter(
 		node => node.data.children[0].event !== 'magnet').filter(
-		node => node.data.children[0].event !== 'identity'), d => d.id);
+		node => node.data.children[0].event !== 'identity').filter(
+		node => node.data.children[0].event !== 'oven'), d => d.id);
 	drawAnalyzers(analyzers, source);
 
 	const analyzersIgnorable = gNode.selectAll('g').data(nodes.filter(
