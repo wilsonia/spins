@@ -19,7 +19,7 @@ import {create, roundDependencies, piDependencies, randomDependencies} from '../
 const {round, pi, random} = create({roundDependencies, piDependencies, randomDependencies});
 
 // Default experimental setup
-let histories = JSON.parse(JSON.stringify(presetExperiments[0]));
+let histories = JSON.parse(JSON.stringify(presetExperiments.one));
 
 // GUI constants
 const nodeLength = 120;
@@ -125,6 +125,12 @@ function draw(source) {
 			'resize',
 			window.ResizeObserver ? null : () => () => svg.dispatch('toggle'),
 		);
+
+	// Draw oven
+	const oven = gNode.selectAll('g').data(nodes.filter(
+		node => (node.data.children[0] !== undefined)).filter(
+		node => node.data.children[0].event === 'oven'));
+	drawOven(oven, source);
 
 	// Draw analyzers
 	const analyzers = gNode.selectAll('g').data(nodes.filter(
@@ -348,6 +354,74 @@ function drawAnalyzers(analyzers, source) {
 
 	analyzers
 		.merge(analyzerEnter)
+		.attr('transform', d => `translate(${d.y},${d.x})`)
+		.attr('fill-opacity', 1)
+		.attr('stroke-opacity', 1);
+}
+
+function drawOven(oven, source) {
+	const ovenEnter = oven
+		.enter()
+		.append('g')
+		.attr('transform', `translate(${source.y0},${source.x0})`)
+		.attr('fill-opacity', 0)
+		.attr('stroke-opacity', 0);
+	// Draw outline
+	ovenEnter
+		.append('rect')
+		.attr('width', nodeLength)
+		.attr('x', -1 * (nodeLength / 2))
+		.attr('y', -1 * (nodeLength / 2))
+		.attr('height', nodeLength)
+		.attr('fill', 'white')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
+
+	// Draw collimator
+	ovenEnter
+		.append('rect')
+		.attr('width', nodeLength / 3)
+		.attr('x', nodeLength / 2)
+		.attr('y', -nodeLength / 6)
+		.attr('height', nodeLength / 3)
+		.attr('fill-opacity', 0)
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
+
+	// Draw collimator lines
+	const collimatorLinePositions = [
+		[(nodeLength / 2) + (nodeLength / 12), -nodeLength / 6],
+		[(nodeLength / 2) + (nodeLength / 12), nodeLength / 24],
+		[(nodeLength / 2) + (nodeLength / 6), -nodeLength / 6],
+		[(nodeLength / 2) + (nodeLength / 6), nodeLength / 24],
+		[(nodeLength / 2) + (nodeLength / 4), -nodeLength / 6],
+		[(nodeLength / 2) + (nodeLength / 4), nodeLength / 24],
+	];
+	collimatorLinePositions.forEach(position => {
+		ovenEnter
+			.append('rect')
+			.attr('width', 1)
+			.attr('x', position[0])
+			.attr('y', position[1])
+			.attr('height', nodeLength / 8)
+			.attr('fill-opacity', 0)
+			.attr('stroke-width', 2)
+			.attr('stroke', 'grey');
+	});
+
+	// Label oven
+	ovenEnter
+		.append('foreignObject')
+		.attr('x', -0.35 * nodeLength)
+		.attr('y', -0.35 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(katex.renderToString('\\Huge{\\textrm{oven}}'));
+
+	oven
+		.merge(ovenEnter)
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
@@ -874,12 +948,12 @@ document.getElementById('reset').onclick = function () {
 // Preset experiment chooser
 document.getElementById('experiment').onchange = function (selectObject) {
 	histories = JSON.parse(JSON.stringify({
-		1: presetExperiments[0],
-		2: presetExperiments[1],
-		3: presetExperiments[2],
-		'4a': presetExperiments[3].a,
-		'4b': presetExperiments[3].b,
-		'4c': presetExperiments[3].c,
+		1: presetExperiments.one,
+		2: presetExperiments.two,
+		3: presetExperiments.three,
+		'4a': presetExperiments.four.a,
+		'4b': presetExperiments.four.b,
+		'4c': presetExperiments.four.c,
 	}[selectObject.target.value]));
 	root = getRoot(histories);
 	draw(root);
