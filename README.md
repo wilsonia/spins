@@ -15,12 +15,12 @@ It accomplishes several goals:
 - Simplifies computation of probabilities by using the consistent histories approach
 - Increases readability of code
 - Imports/exports experiment configurations
-- Eliminates physics errors in Schroeder's simulation
+- Eliminates a counting error in Schroeder's simulation
 - Simplifies user interface
 - Updates tech stack
 
 ## Stack
-The simulation is written in Javascript, adhering to the ES6 specification. The project uses [node.js](https://nodejs.org/en/) for development and dependency management and [webpack](https://webpack.js.org/) for bundling the program for browser execution.
+The simulation is written in Javascript adhering to the ES6 specification. The project uses [node.js](https://nodejs.org/en/) for development and dependency management and [webpack](https://webpack.js.org/) for bundling the program for browser execution.
 Several packages were used to reduce code volume and simplify control flow:
 - [mathjs](https://mathjs.org/) for linear algebra computations
 - [d3-hierarchy](https://github.com/d3/d3-hierarchy) for tree visualization
@@ -52,4 +52,3 @@ mathjs is cloned locally rather than installed via npm. This is so the `maxSearc
 ## TODO
 - Clean up GUI code
 - Spin-1
-- Gun

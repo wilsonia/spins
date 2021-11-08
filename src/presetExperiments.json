@@ -1,241 +1,283 @@
-[
-	{
-		"children":[
+{
+  "one": {
+		"children": [
 			{
+				"event":"oven",
 				"basis":"z",
-				"event":"spinUp",
-				"children":[
-					{
-						"basis":"z",
-						"event":"spinUp",
-						"children":[
+				"ignored":"true",
+		    "children":[
+		      {
+		        "basis":"z",
+		        "event":"spinUp",
+		        "children":[
+		          {
+		            "basis":"z",
+		            "event":"spinUp",
+		            "children":[
 
-						]
-					},
-					{
-						"basis":"z",
-						"event":"spinDown",
-						"children":[
+		            ]
+		          },
+		          {
+		            "basis":"z",
+		            "event":"spinDown",
+		            "children":[
 
-						]
-					}
-				]
-			},
-			{
-				"basis":"z",
-				"event":"spinDown",
-				"children":[
+		            ]
+		          }
+		        ]
+		      },
+		      {
+		        "basis":"z",
+		        "event":"spinDown",
+		        "children":[
 
-				]
+		        ]
+		      }
+		    ]
 			}
 		]
-	},
-	{
-		"children":[
+  },
+  "two": {
+		"children": [
 			{
+				"event":"oven",
 				"basis":"z",
-				"event":"spinUp",
-				"children":[
-					{
-						"basis":"x",
-						"event":"spinUp",
-						"children":[
+				"ignored":"true",
+		    "children":[
+		      {
+		        "basis":"z",
+		        "event":"spinUp",
+		        "children":[
+		          {
+		            "basis":"x",
+		            "event":"spinUp",
+		            "children":[
 
-						]
-					},
-					{
-						"basis":"x",
-						"event":"spinDown",
-						"children":[
+		            ]
+		          },
+		          {
+		            "basis":"x",
+		            "event":"spinDown",
+		            "children":[
 
-						]
-					}
-				]
-			},
-			{
-				"basis":"z",
-				"event":"spinDown",
-				"children":[
+		            ]
+		          }
+		        ]
+		      },
+		      {
+		        "basis":"z",
+		        "event":"spinDown",
+		        "children":[
 
-				]
+		        ]
+		      }
+    		]
 			}
 		]
-	},
-	{
-		"children":[
+  },
+  "three": {
+		"children": [
 			{
+				"event":"oven",
 				"basis":"z",
-				"event":"spinUp",
-				"children":[
-					{
-						"basis":"x",
-						"event":"spinUp",
-						"children":[
-							{
-								"basis":"z",
-								"event":"spinUp",
-								"children":[
+				"ignored":"true",
+		    "children":[
+		      {
+		        "basis":"z",
+		        "event":"spinUp",
+		        "children":[
+		          {
+		            "basis":"x",
+		            "event":"spinUp",
+		            "children":[
+		              {
+		                "basis":"z",
+		                "event":"spinUp",
+		                "children":[
 
-								]
-							},
-							{
-								"basis":"z",
-								"event":"spinDown",
-								"children":[
+		                ]
+		              },
+		              {
+		                "basis":"z",
+		                "event":"spinDown",
+		                "children":[
 
-								]
-							}
-						]
-					},
-					{
-						"basis":"x",
-						"event":"spinDown",
-						"children":[
+		                ]
+		              }
+		            ]
+		          },
+		          {
+		            "basis":"x",
+		            "event":"spinDown",
+		            "children":[
 
-						]
-					}
-				]
-			},
-			{
-				"basis":"z",
-				"event":"spinDown",
-				"children":[
+		            ]
+		          }
+		        ]
+		      },
+		      {
+		        "basis":"z",
+		        "event":"spinDown",
+		        "children":[
 
+		        ]
+		      }
 				]
 			}
-		]
-	},
-	{
-		"a":{
-			"children":[
+    ]
+  },
+  "four": {
+    "a":{
+			"children": [
 				{
+					"event":"oven",
 					"basis":"z",
-					"event":"spinUp",
-					"children":[
-						{
-							"basis":"x",
-							"event":"spinUp",
-							"children":[
-								{
-									"basis":"z",
-									"event":"spinUp",
-									"children":[
+					"ignored":"true",
+		      "children":[
+		        {
+		          "basis":"z",
+		          "event":"spinUp",
+		          "children":[
+		            {
+		              "basis":"x",
+		              "event":"spinUp",
+		              "children":[
+		                {
+		                  "basis":"z",
+		                  "event":"spinUp",
+		                  "children":[
 
-									]
-								},
-								{
-									"basis":"z",
-									"event":"spinDown",
-									"children":[
+		                  ]
+		                },
+		                {
+		                  "basis":"z",
+		                  "event":"spinDown",
+		                  "children":[
 
-									]
-								}
-							]
-						},
-						{
-							"basis":"x",
-							"event":"spinDown",
-							"children":[
+		                  ]
+		                }
+		              ]
+		            },
+		            {
+		              "basis":"x",
+		              "event":"spinDown",
+		              "children":[
 
-							],
-							"ignored":true
-						}
-					]
-				},
-				{
-					"basis":"z",
-					"event":"spinDown",
-					"children":[
+		              ],
+		              "ignored":true
+		            }
+		          ]
+		        },
+		        {
+		          "basis":"z",
+		          "event":"spinDown",
+		          "children":[
 
-					],
-					"ignored":true
+		          ],
+		          "ignored":true
+		        }
+		      ]
 				}
 			]
-		},
-		"b":{
-			"children":[
+    },
+    "b":{
+			"children": [
 				{
+					"event":"oven",
 					"basis":"z",
-					"event":"spinUp",
-					"children":[
-						{
-							"basis":"x",
-							"event":"spinUp",
-							"children":[
+					"ignored":"true",
+		      "children":[
+		        {
+		          "basis":"z",
+		          "event":"spinUp",
+		          "children":[
+		            {
+		              "basis":"x",
+		              "event":"spinUp",
+		              "children":[
 
-							],
-							"ignored":true
-						},
-						{
-							"basis":"x",
-							"event":"spinDown",
-							"children":[
-								{
-									"basis":"z",
-									"event":"spinUp",
-									"children":[
+		              ],
+		              "ignored":true
+		            },
+		            {
+		              "basis":"x",
+		              "event":"spinDown",
+		              "children":[
+		                {
+		                  "basis":"z",
+		                  "event":"spinUp",
+		                  "children":[
 
-									]
-								},
-								{
-									"basis":"z",
-									"event":"spinDown",
-									"children":[
+		                  ]
+		                },
+		                {
+		                  "basis":"z",
+		                  "event":"spinDown",
+		                  "children":[
 
-									]
-								}
-							],
-							"ignored":true
-						}
+		                  ]
+		                }
+		              ],
+		              "ignored":true
+		            }
+		          ]
+		        },
+		        {
+		          "basis":"z",
+		          "event":"spinDown",
+		          "children":[
+
+		          ],
+		          "ignored":true
+		        }
 					]
-				},
-				{
-					"basis":"z",
-					"event":"spinDown",
-					"children":[
-
-					],
-					"ignored":true
 				}
-			]
-		},
-		"c":{
-			"children":[
+      ]
+    },
+    "c":{
+			"children": [
 				{
+					"event":"oven",
 					"basis":"z",
-					"event":"spinUp",
-					"children":[
-						{
-							"basis":"x",
-							"event":"identity",
-							"children":[
-								{
-									"basis":"z",
-									"event":"spinUp",
-									"children":[
+					"ignored":"true",
+		      "children":[
+		        {
+		          "basis":"z",
+		          "event":"spinUp",
+		          "children":[
+		            {
+		              "basis":"x",
+		              "event":"identity",
+		              "children":[
+		                {
+		                  "basis":"z",
+		                  "event":"spinUp",
+		                  "children":[
 
-									]
-								},
-								{
-									"basis":"z",
-									"event":"spinDown",
-									"children":[
+		                  ]
+		                },
+		                {
+		                  "basis":"z",
+		                  "event":"spinDown",
+		                  "children":[
 
-									]
-								}
-							]
-						}
+		                  ]
+		                }
+		              ]
+		            }
+		          ]
+		        },
+		        {
+		          "basis":"z",
+		          "event":"spinDown",
+		          "children":[
+
+		          ],
+		          "ignored":true
+		        }
 					]
-				},
-				{
-					"basis":"z",
-					"event":"spinDown",
-					"children":[
-
-					],
-					"ignored":true
 				}
-			]
-		}
-	}
-]
+      ]
+    }
+  }
+}

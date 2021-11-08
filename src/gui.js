@@ -12,14 +12,16 @@ import initial from 'lodash/initial';
 import findIndex from 'lodash/findIndex';
 import katex from 'katex';
 import findDeep from 'deepdash/findDeep';
+import eachDeep from 'deepdash/eachDeep';
 
 // Import math modules in a way that minimizes bundle size
 import {create, roundDependencies, piDependencies, randomDependencies} from '../mathjs/lib/esm/index.js';
 const {round, pi, random} = create({roundDependencies, piDependencies, randomDependencies});
 
 // Default experimental setup
-let histories = JSON.parse(JSON.stringify(presetExperiments[0]));
+let histories = JSON.parse(JSON.stringify(presetExperiments.one));
 
+// GUI constants
 const nodeLength = 120;
 const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength * 1.5, left: nodeLength};
 const width = 1300;
@@ -38,9 +40,14 @@ const svg = d3
 	.style('user-select', 'none');
 document.querySelector('#app').appendChild(svg.node());
 
+// Draw tree
+let root = getRoot(histories);
+draw(root);
+
 // Configures a d3 hierarchy for a given set of histories
 function getRoot(histories) {
 	const root = d3.hierarchy(computeProbabilities(histories));
+
 	root.x0 = dy / 2;
 	root.y0 = 0;
 	root.descendants().forEach((d, i) => {
@@ -62,13 +69,24 @@ function getRoot(histories) {
 		}
 	});
 
+	// Handle conditional probabilities
+	let ignoredEventProbabilitySum = 0;
+	eachDeep(root, value => {
+		if (value.data.ignored === true) {
+			ignoredEventProbabilitySum += value.data.probability;
+			value.data.probability = 0;
+		}
+	}, {leavesOnly: true, childrenPath: 'children'});
+
+	if (ignoredEventProbabilitySum) {
+		eachDeep(root, value => {
+			value.data.probability /= ignoredEventProbabilitySum;
+		}, {leavesOnly: true, childrenPath: 'children'});
+	}
+
 	tree(root);
 	return root;
 }
-
-// Draw tree
-let root = getRoot(histories);
-draw(root);
 
 // Binds d3 hierarchy to svg nodes and links
 function draw(source) {
@@ -108,11 +126,18 @@ function draw(source) {
 			window.ResizeObserver ? null : () => () => svg.dispatch('toggle'),
 		);
 
+	// Draw oven
+	const oven = gNode.selectAll('g').data(nodes.filter(
+		node => (node.data.children[0] !== undefined)).filter(
+		node => node.data.children[0].event === 'oven'));
+	drawOven(oven, source);
+
 	// Draw analyzers
 	const analyzers = gNode.selectAll('g').data(nodes.filter(
 		node => (node.data.children[0] !== undefined)).filter(
 		node => node.data.children[0].event !== 'magnet').filter(
-		node => node.data.children[0].event !== 'identity'), d => d.id);
+		node => node.data.children[0].event !== 'identity').filter(
+		node => node.data.children[0].event !== 'oven'), d => d.id);
 	drawAnalyzers(analyzers, source);
 
 	const analyzersIgnorable = gNode.selectAll('g').data(nodes.filter(
@@ -329,6 +354,74 @@ function drawAnalyzers(analyzers, source) {
 
 	analyzers
 		.merge(analyzerEnter)
+		.attr('transform', d => `translate(${d.y},${d.x})`)
+		.attr('fill-opacity', 1)
+		.attr('stroke-opacity', 1);
+}
+
+function drawOven(oven, source) {
+	const ovenEnter = oven
+		.enter()
+		.append('g')
+		.attr('transform', `translate(${source.y0},${source.x0})`)
+		.attr('fill-opacity', 0)
+		.attr('stroke-opacity', 0);
+	// Draw outline
+	ovenEnter
+		.append('rect')
+		.attr('width', nodeLength)
+		.attr('x', -1 * (nodeLength / 2))
+		.attr('y', -1 * (nodeLength / 2))
+		.attr('height', nodeLength)
+		.attr('fill', 'white')
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
+
+	// Draw collimator
+	ovenEnter
+		.append('rect')
+		.attr('width', nodeLength / 3)
+		.attr('x', nodeLength / 2)
+		.attr('y', -nodeLength / 6)
+		.attr('height', nodeLength / 3)
+		.attr('fill-opacity', 0)
+		.attr('stroke-width', 2)
+		.attr('stroke', 'grey');
+
+	// Draw collimator lines
+	const collimatorLinePositions = [
+		[(nodeLength / 2) + (nodeLength / 12), -nodeLength / 6],
+		[(nodeLength / 2) + (nodeLength / 12), nodeLength / 24],
+		[(nodeLength / 2) + (nodeLength / 6), -nodeLength / 6],
+		[(nodeLength / 2) + (nodeLength / 6), nodeLength / 24],
+		[(nodeLength / 2) + (nodeLength / 4), -nodeLength / 6],
+		[(nodeLength / 2) + (nodeLength / 4), nodeLength / 24],
+	];
+	collimatorLinePositions.forEach(position => {
+		ovenEnter
+			.append('rect')
+			.attr('width', 1)
+			.attr('x', position[0])
+			.attr('y', position[1])
+			.attr('height', nodeLength / 8)
+			.attr('fill-opacity', 0)
+			.attr('stroke-width', 2)
+			.attr('stroke', 'grey');
+	});
+
+	// Label oven
+	ovenEnter
+		.append('foreignObject')
+		.attr('x', -0.35 * nodeLength)
+		.attr('y', -0.35 * nodeLength)
+		.attr('width', nodeLength)
+		.attr('height', nodeLength / 2)
+		.style('pointer-events', 'none')
+		.append('xhtml:body')
+		.html(katex.renderToString('\\Huge{\\textrm{oven}}'));
+
+	oven
+		.merge(ovenEnter)
 		.attr('transform', d => `translate(${d.y},${d.x})`)
 		.attr('fill-opacity', 1)
 		.attr('stroke-opacity', 1);
@@ -815,7 +908,7 @@ function recordEvent() {
 		}
 
 		return false;
-	}, {pathFormat: 'array'});
+	}, {pathFormat: 'array', leavesOnly: true});
 	const path = initial(branch.context._item.path);
 	const count = branch.parent.count + 1;
 	if (count > 100) {
@@ -854,13 +947,14 @@ document.getElementById('reset').onclick = function () {
 
 // Preset experiment chooser
 document.getElementById('experiment').onchange = function (selectObject) {
+	stop();
 	histories = JSON.parse(JSON.stringify({
-		1: presetExperiments[0],
-		2: presetExperiments[1],
-		3: presetExperiments[2],
-		'4a': presetExperiments[3].a,
-		'4b': presetExperiments[3].b,
-		'4c': presetExperiments[3].c,
+		1: presetExperiments.one,
+		2: presetExperiments.two,
+		3: presetExperiments.three,
+		'4a': presetExperiments.four.a,
+		'4b': presetExperiments.four.b,
+		'4c': presetExperiments.four.c,
 	}[selectObject.target.value]));
 	root = getRoot(histories);
 	draw(root);

@@ -34,12 +34,12 @@ function projector(state) {
    Leaving the oven, the electron's initial spin state is effectively random due to ignorance of its history
    This is best represented by a mixed-state density matrix
 */
-const densityOperator = add(multiply(projector(spinState(1, 0, 0)), 1 / 2), multiply(projector(spinState(0, 0, 0)), 1 / 2));
+const ovenDensityOperator = add(multiply(projector(spinState(1, 0, 0)), 1 / 2), multiply(projector(spinState(0, 0, 0)), 1 / 2));
 
 // Born Rule for a quantum history (expects a class operator)
 function probability(history) {
 	// Function re() is present because of the nature of mathjs complex numbers, not physics
-	return re(trace(multiply(ctranspose(history), densityOperator, history)));
+	return re(trace(multiply(ctranspose(history), history)));
 }
 
 /*
@@ -85,6 +85,9 @@ function computeProbabilities(histories) {
 					break;
 				case 'spinDown':
 					history = multiply(projector(spinState(false, theta, phi)), history);
+					break;
+				case 'oven':
+					history = multiply(ovenDensityOperator, history);
 					break;
 				default:
 					break;
