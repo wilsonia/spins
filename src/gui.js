@@ -947,6 +947,7 @@ document.getElementById('reset').onclick = function () {
 
 // Preset experiment chooser
 document.getElementById('experiment').onchange = function (selectObject) {
+	stop();
 	histories = JSON.parse(JSON.stringify({
 		1: presetExperiments.one,
 		2: presetExperiments.two,
