@@ -25,6 +25,5 @@
  	- theta is the polar coordinate
  	- phi is the azimuthal coordinate
 
-### Specifying magnet magnitude
-- The Larmor frequency of the magnet is set by clicking on omega and dragging the slider to any value between 0 and 2 * pi.
-- The Larmor frequency is directly proportional to the magnetic field magnitude and the duration of the electron's interaction with the magnetic field.
+### Specifying magnet magnitude/duration
+- The quantity (Larmor frequency • duration of interaction) is set by clicking on ωt and dragging the slider to any value between 0 and 2 * pi.

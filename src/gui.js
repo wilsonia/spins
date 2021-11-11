@@ -668,7 +668,7 @@ function drawMagnets(magnets, source) {
 		.attr('height', nodeLength / 3)
 		.style('pointer-events', 'none')
 		.append('xhtml:body')
-		.html(d => katex.renderToString(`\\Large{\\omega = ${d.magnitude}}`));
+		.html(d => katex.renderToString(`\\Large{\\omega t = ${d.magnitude}}`));
 
 	magnetEnter
 		.append('rect')
@@ -688,7 +688,7 @@ function drawMagnets(magnets, source) {
 				.attr('height', nodeLength / 3)
 				.style('ponter-events', 'none')
 				.append('xhtml:body')
-				.html(katex.renderToString('\\LARGE{\\omega = \\frac{e}{m_e} |\\vec{B}|}'));
+				.html(katex.renderToString('\\LARGE{\\omega t = \\frac{e}{m_e} |\\vec{B}| t}'));
 			svg.append('g')
 				.attr('pointer-events', 'all')
 				.attr('transform', `translate(${click.target.__data__.y + dx}, ${click.target.__data__.x + (1.6 * dx)})`)
