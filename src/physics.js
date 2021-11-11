@@ -47,6 +47,7 @@ function probability(history) {
  	oriented in direction defined by polar angle theta and azimuthal angle phi.
 */
 function magnetPropagator(theta, phi, magnitude) {
+	magnitude /= 2;
 	return expm(matrix(
 		[
 			[
