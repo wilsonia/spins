@@ -1,6 +1,7 @@
 import {computeProbabilities} from './physics.js';
 import {basisClick, counterClick, counterBlockClick, eventClick, magnetClick} from './clicks';
 import presetExperiments from './presetExperiments.json';
+import {nodeLength, margin, width, dx, dy, diagonal, tree, svg} from './draw/guiConfig.js';
 import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
@@ -17,25 +18,6 @@ const {round, pi, random} = create({roundDependencies, piDependencies, randomDep
 
 // Default experimental setup
 let histories = JSON.parse(JSON.stringify(presetExperiments.one));
-
-// GUI constants
-const nodeLength = 120;
-const margin = {top: nodeLength, right: nodeLength, bottom: nodeLength * 1.5, left: nodeLength};
-const width = 1300;
-const dx = 65;
-const dy = width / 8;
-const diagonal = d3
-	.linkHorizontal()
-	.x(d => d.y - (dy / 4))
-	.y(d => d.x);
-const tree = d3.tree().nodeSize([dx + (nodeLength / 2), dy + (nodeLength / 2)]);
-
-const svg = d3
-	.create('svg')
-	.attr('viewBox', [-margin.left, -margin.top, width, dx])
-	.style('font', '10px sans-serif')
-	.style('user-select', 'none');
-document.querySelector('#app').appendChild(svg.node());
 
 // Draw tree
 let root = getRoot(histories);
