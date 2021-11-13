@@ -1,6 +1,6 @@
 import {computeProbabilities} from './physics.js';
 import {basisClick, counterClick, counterBlockClick, eventClick, magnetClick} from './clicks';
-import * as presetExperiments from './presetExperiments.json';
+import presetExperiments from './presetExperiments.json';
 import * as d3 from 'd3';
 import {sliderHorizontal} from 'd3-simple-slider';
 import set from 'lodash/set';
