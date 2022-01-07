@@ -75,6 +75,39 @@
 			}
 		]
   },
+		"twoA": {
+	  "children": [
+	    {
+	      "event": "oven",
+	      "basis": "z",
+	      "ignored": "true",
+	      "children": [
+	        {
+	          "basis": "z",
+	          "event": "spinUp",
+	          "children": [
+	            {
+	              "basis": "x",
+	              "event": "spinUp",
+	              "children": []
+	            },
+	            {
+	              "basis": "x",
+	              "event": "spinDown",
+	              "children": []
+	            }
+	          ]
+	        },
+	        {
+	          "basis": "z",
+	          "event": "spinDown",
+	          "children": [],
+	          "ignored": true
+	        }
+	      ]
+	    }
+	  ]
+	},
   "three": {
 		"children": [
 			{
@@ -126,8 +159,7 @@
 			}
     ]
   },
-  "four": {
-    "a":{
+  "fourA": {
 			"children": [
 				{
 					"event":"oven",
@@ -180,7 +212,7 @@
 				}
 			]
     },
-    "b":{
+    "fourB":{
 			"children": [
 				{
 					"event":"oven",
@@ -234,7 +266,7 @@
 				}
       ]
     },
-    "c":{
+    "fourC":{
 			"children": [
 				{
 					"event":"oven",
@@ -279,5 +311,5 @@
 				}
       ]
     }
-  }
+
 }
