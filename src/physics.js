@@ -5,6 +5,7 @@ import get from 'lodash/get';
 import {create, complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies} from '../mathjs/lib/esm/index.js';
 const {complex, matrix, kron, ctranspose, multiply, add, trace, identity, re, cos, sin, exp, expm, pi} = create({complexDependencies, matrixDependencies, kronDependencies, ctransposeDependencies, multiplyDependencies, addDependencies, traceDependencies, identityDependencies, reDependencies, cosDependencies, sinDependencies, powDependencies, expDependencies, expmDependencies, piDependencies});
 
+// Define spin bases with azimuthal angle theta and polar angle phi
 const spinOrientations = {
 	z: {
 		theta: 0,
@@ -63,7 +64,7 @@ function magnetPropagator(theta, phi, magnitude) {
 }
 
 /*
-   Calculates the probabilities for a consistent set of histories (formatted as a tree of events, see history schema).
+   Calculates the probabilities for a consistent set of histories (formatted as a tree of events).
 	 Deepdash traverses the tree, and assigns each endpoint (leaf) a class operator.
 	 The class operator is used to compute history probability, which is then assigned as the leaf's value.
 */

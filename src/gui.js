@@ -17,7 +17,10 @@ import {create, roundDependencies, piDependencies, randomDependencies} from '../
 const {round, pi, random} = create({roundDependencies, piDependencies, randomDependencies});
 
 // Default experimental setup
-let histories = JSON.parse(JSON.stringify(presetExperiments.one));
+const urlString = window.location.href;
+const url = new URL(urlString);
+const experiment = url.searchParams.get('experiment');
+let histories = JSON.parse(JSON.stringify(experiment ? presetExperiments[experiment] : presetExperiments.one));
 
 // Draw tree
 let root = getRoot(histories);
@@ -931,9 +934,9 @@ document.getElementById('experiment').onchange = function (selectObject) {
 		1: presetExperiments.one,
 		2: presetExperiments.two,
 		3: presetExperiments.three,
-		'4a': presetExperiments.four.a,
-		'4b': presetExperiments.four.b,
-		'4c': presetExperiments.four.c,
+		'4a': presetExperiments.fourA,
+		'4b': presetExperiments.fourB,
+		'4c': presetExperiments.fourC,
 	}[selectObject.target.value]));
 	root = getRoot(histories);
 	draw(root);
